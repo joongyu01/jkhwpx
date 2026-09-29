@@ -3,123 +3,132 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>공문 hwpx 생성기</title>
+<meta name="theme-color" content="#f5f6f8">
+<title>JK HWPX · 공문 작성 스튜디오</title>
 <style>
   :root {
-    --ink: #1d232b;
-    --ink-2: #4a5462;
-    --ink-3: #7b8594;
-    --line: #d9dee5;
-    --line-2: #eceff3;
-    --paper: #ffffff;
-    --ground: #f3f4f6;
-    --accent: #1f4e8c;
-    --accent-2: #e8eef7;
-    --ok: #1f7a4d;
-    --ok-bg: #e7f4ec;
-    --warn: #8a5a00;
-    --warn-bg: #fbf1dc;
-    --err: #a1261b;
-    --err-bg: #fbe9e7;
-    --radius: 10px;
-    color-scheme: light;
+    --ink: #24262b; --ink-2: #616773; --ink-3: #747b87;
+    --line: #dce0e7; --line-2: #e9ecf1;
+    --paper: #ffffff; --ground: #f5f6f8; --field: #f8f9fb;
+    --sidebar: rgba(239,242,247,.88); --chrome: rgba(255,255,255,.82);
+    --accent: #0869e8; --accent-hover: #0058c9; --accent-2: #e9f1ff;
+    --ok: #287549; --ok-bg: #eaf6ee; --warn: #8a5a00; --warn-bg: #fbf1dc;
+    --err: #b52c32; --err-bg: #fff0f0; --radius: 14px;
+    --shadow: 0 3px 12px rgba(23,39,66,.04), 0 1px 2px rgba(23,39,66,.03);
+    --workspace: #e9edf2; color-scheme: light;
+  }
+  :root[data-theme="dark"] {
+    --ink: #eff1f5; --ink-2: #bac1cd; --ink-3: #9ba5b6;
+    --line: #3b414e; --line-2: #303642; --paper: #252a34; --ground: #1b1f27;
+    --field: #20252e; --sidebar: rgba(32,37,47,.94); --chrome: rgba(37,42,52,.9);
+    --accent: #478eff; --accent-hover: #2d7df6; --accent-2: #243954;
+    --ok: #8bd5a9; --ok-bg: #213c2f; --warn: #edc47c; --warn-bg: #433921;
+    --err: #ffabb0; --err-bg: #472a30; --workspace: #181d25;
+    --shadow: 0 4px 18px rgba(0,0,0,.1); color-scheme: dark;
   }
   * { box-sizing: border-box; }
-  body {
-    margin: 0;
-    background: var(--ground);
-    color: var(--ink);
-    font: 15px/1.6 "Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", system-ui, sans-serif;
-  }
-  header.top { background: var(--paper); border-bottom: 1px solid var(--line); }
-  .wrap { max-width: 1360px; margin: 0 auto; padding: 0 24px; }
-  header.top .wrap { display: flex; align-items: baseline; gap: 16px; padding-top: 18px; padding-bottom: 16px; flex-wrap: wrap; }
-  header.top h1 { font-size: 20px; margin: 0; letter-spacing: -0.3px; }
-  header.top p { margin: 0; color: var(--ink-2); font-size: 14px; }
-
-  main.wrap { display: grid; grid-template-columns: minmax(0, 560px) minmax(0, 1fr); gap: 24px; padding-top: 24px; padding-bottom: 48px; align-items: start; }
-  @media (max-width: 1020px) { main.wrap { grid-template-columns: 1fr; } }
-
-  .panel { background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); }
-  .step { padding: 18px 20px 20px; }
+  body { margin: 0; background: var(--ground); color: var(--ink); font: 13px/1.6 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", "Malgun Gothic", sans-serif; -webkit-font-smoothing: antialiased; }
+  button, input, textarea { font: inherit; }
+  button, .filebtn { border: 1px solid var(--line); border-radius: 8px; background: var(--paper); color: var(--ink); padding: 8px 12px; cursor: pointer; transition: background .15s, border-color .15s, box-shadow .15s; }
+  button:hover:not(:disabled), .filebtn:hover { background: var(--field); border-color: var(--ink-3); }
+  button:focus-visible, a:focus-visible, summary:focus-visible, .filebtn:focus-within { outline: 3px solid var(--accent); outline-offset: 3px; }
+  button.primary { background: var(--accent); border-color: var(--accent); color: white; font-weight: 600; box-shadow: 0 2px 5px rgba(0,90,220,.12); }
+  button.primary:hover:not(:disabled) { background: var(--accent-hover); border-color: var(--accent-hover); }
+  button:disabled { opacity: .42; cursor: not-allowed; box-shadow: none; }
+  svg.icon { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+  .app-window { margin: 22px auto; width: calc(100% - 44px); max-width: 1700px; height: calc(100dvh - 44px); min-height: 580px; display: flex; flex-direction: column; border: 1px solid var(--line); border-radius: 16px; overflow: hidden; box-shadow: 0 24px 80px rgba(27,43,72,.12), 0 3px 14px rgba(27,43,72,.06); }
+  header.top { display: flex; align-items: center; gap: 18px; min-height: 62px; padding: 0 22px; background: var(--chrome); border-bottom: 1px solid var(--line); backdrop-filter: blur(24px); flex-shrink: 0; }
+  .traffic-lights { display: flex; gap: 7px; padding-right: 10px; }
+  .traffic-lights i { width: 11px; height: 11px; border-radius: 50%; background: #ff6058; box-shadow: inset 0 0 0 1px rgba(0,0,0,.08); }
+  .traffic-lights i:nth-child(2) { background: #ffbd2e; } .traffic-lights i:nth-child(3) { background: #28c840; }
+  .brand { display: flex; align-items: center; gap: 10px; }
+  .brand-mark { width: 31px; height: 34px; display: grid; place-items: center; color: white; background: linear-gradient(145deg,#59a3ff,#1265df); border-radius: 9px; box-shadow: 0 2px 6px #1766dc30; }
+  header.top h1 { font-size: 15px; font-weight: 700; letter-spacing: -.4px; margin: 0; line-height: 1.2; }
+  .brand-caption { font-size: 10px; color: var(--ink-3); letter-spacing: .6px; }
+  .top-divider { width: 1px; height: 24px; background: var(--line); }
+  .app-caption { color: var(--ink-2); font-size: 12px; }
+  .header-actions { display: flex; align-items: center; gap: 12px; margin-left: auto; }
+  .private-badge { display: flex; align-items: center; gap: 6px; color: var(--ink-2); font-size: 11px; }
+  .private-badge .icon { width: 13px; height: 13px; color: var(--ok); }
+  .icon-button { display: grid; place-items: center; width: 32px; height: 32px; padding: 0; background: transparent; border-color: transparent; }
+  .workspace { display: grid; grid-template-columns: 218px minmax(0,1fr); flex: 1; min-height: 0; }
+  .sidebar { min-height: 0; overflow-y: auto; padding: 26px 13px 18px; background: var(--sidebar); border-right: 1px solid var(--line); }
+  .sidebar-heading { display: flex; align-items: center; justify-content: space-between; padding: 0 11px 16px; }
+  .sidebar-heading h2 { font-size: 12px; margin: 0; font-weight: 600; color: var(--ink-2); }
+  .count-badge { font-size: 10px; color: var(--ink-3); border: 1px solid var(--line); border-radius: 5px; padding: 0 5px; }
+  .groups { display: grid; gap: 22px; }
+  .group .gname { font-size: 10px; color: var(--ink-3); font-weight: 600; padding: 0 11px 6px; letter-spacing: .3px; }
+  .chips { display: grid; gap: 3px; }
+  .chip { position: relative; display: flex; align-items: center; gap: 9px; text-align: left; width: 100%; border: 1px solid transparent; background: transparent; font-size: 12px; padding: 8px 10px; border-radius: 7px; line-height: 1.5; }
+  .chip::before { content: ''; display: block; width: 11px; height: 14px; border: 1.3px solid currentColor; border-radius: 2px; flex-shrink: 0; opacity: .55; }
+  .chip:hover:not(:disabled) { background: var(--line-2); border-color: transparent; }
+  .chip[aria-pressed="true"], .chip[aria-pressed="true"]:hover { background: var(--accent); border-color: var(--accent); color: white; font-weight: 600; box-shadow: 0 2px 5px #0062dd1a; }
+  .sidebar-note { margin: 28px 10px 0; padding-top: 18px; border-top: 1px solid var(--line); font-size: 11px; color: var(--ink-3); }
+  .sidebar-note strong { color: var(--ink-2); font-weight: 500; display: block; margin-bottom: 4px; }
+  .main-content { min-width: 0; min-height: 0; overflow-y: auto; padding: 26px 28px 32px; }
+  .intro { display: flex; align-items: center; gap: 20px; justify-content: space-between; margin-bottom: 24px; }
+  .eyebrow { color: var(--accent); font-size: 10px; letter-spacing: 1.5px; font-weight: 700; margin-bottom: 5px; }
+  .intro h2 { font-size: 25px; letter-spacing: -1px; margin: 0 0 5px; font-weight: 650; }
+  .intro p { color: var(--ink-2); font-size: 12px; margin: 0; }
+  .workflow-badge { color: var(--ink-3); display: flex; align-items: center; gap: 8px; font-size: 11px; white-space: nowrap; }
+  .workflow-badge b { font-weight: 500; color: var(--accent); background: var(--accent-2); border-radius: 6px; padding: 5px 8px; }
+  main.wrap { display: grid; grid-template-columns: minmax(320px,.85fr) minmax(350px,1.15fr); gap: 22px; align-items: start; }
+  .panel { background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); min-width: 0; }
+  .input-panel { overflow: hidden; }
+  .step { padding: 22px; }
   .step + .step { border-top: 1px solid var(--line-2); }
-  .step h2 { display: flex; align-items: center; gap: 10px; font-size: 16px; margin: 0 0 6px; }
-  .step h2 .num { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: var(--accent); color: #fff; font-size: 13px; flex: none; }
-  .step .desc { margin: 0 0 12px; color: var(--ink-2); font-size: 14px; }
-
-  /* 문서 유형 */
-  .groups { display: grid; gap: 10px; }
-  .group { display: grid; grid-template-columns: 76px 1fr; gap: 8px; align-items: start; }
-  .group .gname { font-size: 13px; font-weight: 700; color: var(--ink-2); padding-top: 6px; }
-  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
-  .chip {
-    font: inherit; font-size: 13.5px; cursor: pointer;
-    border: 1px solid var(--line); background: var(--paper); color: var(--ink);
-    padding: 5px 11px; border-radius: 999px;
-  }
-  .chip:hover { border-color: var(--ink-3); }
-  .chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
-  .type-detail { margin-top: 14px; border: 1px solid var(--line); border-radius: 8px; background: #fafbfc; padding: 12px 14px; }
+  .step h2 { display: flex; align-items: center; gap: 8px; font-size: 13px; margin: 0 0 9px; letter-spacing: -.2px; }
+  .step h2 .num { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 6px; background: var(--accent-2); color: var(--accent); font-size: 10px; font-weight: 600; flex: none; }
+  .step .desc { margin: 0 0 14px; color: var(--ink-2); font-size: 11px; line-height: 1.8; }
+  .type-detail { margin-bottom: 20px; border: 1px solid var(--line); border-radius: 10px; background: var(--field); padding: 14px; }
   .type-detail[hidden] { display: none; }
-  .type-detail .when { font-size: 13.5px; color: var(--ink-2); margin: 0 0 8px; }
-  .toc { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
-  .toc li { display: grid; grid-template-columns: 28px 1fr; gap: 6px; font-size: 13.5px; }
-  .toc .rn { font-weight: 700; color: var(--accent); }
-  .toc .st { font-weight: 700; }
-  .toc .gd { color: var(--ink-3); font-size: 12.5px; display: block; }
-  .toc .opt { font-size: 11.5px; color: var(--warn); background: var(--warn-bg); padding: 0 5px; border-radius: 4px; margin-left: 4px; font-weight: 400; }
-  .type-detail .extras, .type-detail .basis { font-size: 12.5px; color: var(--ink-3); margin: 8px 0 0; }
+  .type-detail .when { font-size: 12px; color: var(--ink-2); margin: 0 0 10px; }
+  .toc { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+  .toc li { display: grid; grid-template-columns: 20px 1fr; gap: 4px; font-size: 11px; }
+  .toc .rn { color: var(--accent); font-weight: 600; } .toc .st { font-weight: 600; }
+  .toc .gd { display: none; } .toc .opt { font-size: 10px; color: var(--warn); background: var(--warn-bg); padding: 0 4px; border-radius: 3px; margin-left: 4px; }
+  .type-detail .extras, .type-detail .basis { font-size: 10px; color: var(--ink-3); margin: 8px 0 0; }
+  textarea, input[type=text] { width: 100%; font: 12px/1.8 ui-monospace, SFMono-Regular, Consolas, "Malgun Gothic", monospace; color: var(--ink); background: var(--field); border: 1px solid var(--line); border-radius: 8px; padding: 12px; resize: vertical; }
+  textarea::placeholder, input::placeholder { color: var(--ink-3); }
+  textarea.plain { font-family: inherit; font-size: 12px; }
+  textarea:focus, input:focus { outline: 3px solid var(--accent-2); border-color: var(--accent); }
+  #material { min-height: 118px; } #json { min-height: 190px; tab-size: 2; } #fileName { font-family: inherit; font-size: 11px; }
+  .row { display: flex; gap: 7px; flex-wrap: wrap; align-items: center; margin-top: 10px; }
+  .row button, .filebtn { font-size: 11px; }
+  .hint { color: var(--ink-3); font-size: 10px; line-height: 1.7; }
+  #promptHint { display: block; width: 100%; margin-top: 3px; }
+  .big { padding: 11px 16px; } #download { width: 100%; font-size: 12px; }
+  .filebtn { position: relative; display: inline-flex; align-items: center; }
+  .filebtn input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+  .msgs { margin-top: 12px; display: grid; gap: 6px; } .msgs:empty { display: none; }
+  .msg { font-size: 11px; padding: 9px 11px; border-radius: 7px; overflow-wrap: anywhere; }
+  .msg.err { background: var(--err-bg); color: var(--err); } .msg.warn { background: var(--warn-bg); color: var(--warn); } .msg.ok { background: var(--ok-bg); color: var(--ok); }
+  details.adv { padding: 16px 22px; border-top: 1px solid var(--line-2); background: var(--field); }
+  details.adv summary { cursor: pointer; font-weight: 500; font-size: 11px; }
+  details.adv p { font-size: 11px; color: var(--ink-2); margin: 10px 0; }
+  .preview { position: sticky; top: 0; overflow: hidden; }
+  .preview-head { display: flex; align-items: center; padding: 15px 18px; border-bottom: 1px solid var(--line); gap: 8px; }
+  .preview-head h2 { font-size: 12px; font-weight: 600; margin: 0; }
+  .preview-head .icon { width: 15px; color: var(--ink-3); }
+  .preview-meta { margin-left: auto; font-size: 10px; color: var(--ink-3); background: var(--field); padding: 2px 7px; border: 1px solid var(--line-2); border-radius: 5px; }
+  .preview-scroll { padding: 28px; overflow: auto; max-height: calc(100dvh - 310px); min-height: 440px; background: var(--workspace); }
+  .sheet { width: 100%; min-width: 280px; max-width: 760px; min-height: 560px; margin: 0 auto; background: white; box-shadow: 0 4px 20px rgba(16,30,52,.09),0 0 0 1px rgba(16,30,52,.03); padding: 32px 28px 44px; font-family: "Malgun Gothic", "Apple SD Gothic Neo", sans-serif; color: #000; }
+  .sheet:has(.empty) { display: grid; place-items: center; }
+  .empty { color: #87909e; text-align: center; padding: 60px 12px; font-size: 12px; line-height: 1.9; }
+  .empty-icon { width: 58px; height: 68px; margin: 0 auto 22px; border: 1px solid #d9e0e9; border-radius: 7px; position: relative; background: linear-gradient(145deg,#fff,#f5f7fb); box-shadow: 0 5px 12px #263b5d08; }
+  .empty-icon::before { content: ''; position: absolute; left: 13px; right: 13px; top: 24px; height: 2px; background: #cfd9e7; box-shadow: 0 9px #dce3ed, 0 18px #dce3ed; }
+  .empty strong { display: block; color: #657183; font-size: 14px; font-weight: 500; margin-bottom: 7px; }
+  .preview-foot { border-top: 1px solid var(--line); padding: 11px 18px; font-size: 10px; color: var(--ink-3); display: flex; gap: 6px; align-items: center; }
+  .preview-foot .icon { width: 12px; height: 12px; }
+  .statusbar { display: flex; align-items: center; justify-content: space-between; padding: 7px 18px; color: var(--ink-3); font-size: 10px; background: var(--chrome); border-top: 1px solid var(--line); flex-shrink: 0; }
+  .status-dot { display: inline-block; width: 5px; height: 5px; background: #42b77b; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
+  .statusbar a { color: var(--ink-3); text-decoration: none; } .statusbar a:hover { color: var(--accent); }
+  @media (min-width: 1600px) { .main-content { padding: 32px 40px; } main.wrap { gap: 28px; } .sheet { padding: 44px; } }
+  @media (max-width: 1190px) { .workspace { grid-template-columns: 192px minmax(0,1fr); } .main-content { padding: 22px 18px; } main.wrap { grid-template-columns: minmax(290px,.9fr) minmax(300px,1.1fr); gap: 16px; } .workflow-badge { display: none; } .preview-scroll { padding: 18px; } .step { padding: 18px; } }
+  @media (max-width: 960px) { .app-window { margin: 0; width: 100%; height: auto; min-height: 100dvh; border: 0; border-radius: 0; } .workspace { grid-template-columns: 178px minmax(0,1fr); } .sidebar { overflow: visible; } .main-content { overflow: visible; } main.wrap { grid-template-columns: 1fr; } .preview { position: static; } .preview-scroll { max-height: 740px; } .private-badge { display: none; } .app-caption { font-size: 11px; } }
+  @media (max-width: 620px) { header.top { gap: 10px; min-height: 58px; padding: 0 16px; } .traffic-lights, .top-divider, .app-caption { display: none; } .workspace { display: block; } .sidebar { padding: 16px; border-right: 0; border-bottom: 1px solid var(--line); } .sidebar-heading { padding: 0 0 10px; } .groups { display: flex; overflow-x: auto; gap: 18px; padding-bottom: 6px; } .group { flex: 0 0 auto; } .group .gname { padding-left: 6px; } .chips { display: flex; } .chip { width: auto; white-space: nowrap; padding: 8px; } .chip::before { display: none; } .sidebar-note { display: none; } .main-content { padding: 22px 14px; } .intro h2 { font-size: 23px; } .intro { margin-bottom: 18px; } .preview-scroll { padding: 16px; min-height: 400px; } .sheet { min-width: 0; padding: 24px 18px; } .statusbar { padding: 9px 14px; } .statusbar .status-detail { display: none; } }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; scroll-behavior: auto !important; } }
 
-  textarea, input[type=text] {
-    width: 100%;
-    font: 13.5px/1.55 ui-monospace, "D2Coding", Consolas, "Malgun Gothic", monospace;
-    color: var(--ink);
-    background: #fbfbfc;
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    padding: 10px 12px;
-    resize: vertical;
-  }
-  textarea.plain { font-family: inherit; font-size: 14px; }
-  textarea:focus, input:focus { outline: 2px solid var(--accent-2); border-color: var(--accent); }
-  #material { min-height: 96px; }
-  #json { min-height: 300px; }
-
-  .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 10px; }
-  button, .filebtn {
-    font: inherit; font-size: 14px;
-    border: 1px solid var(--line); background: var(--paper); color: var(--ink);
-    padding: 7px 14px; border-radius: 8px; cursor: pointer;
-  }
-  button:hover, .filebtn:hover { border-color: var(--ink-3); }
-  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
-  button.primary:hover { background: #173d6f; }
-  button:disabled { opacity: .45; cursor: not-allowed; }
-  .big { padding: 11px 20px; font-size: 15px; }
-  .hint { color: var(--ink-3); font-size: 13px; }
-  .filebtn input { display: none; }
-
-  .msgs { margin-top: 12px; display: grid; gap: 6px; }
-  .msg { font-size: 13.5px; padding: 8px 12px; border-radius: 8px; }
-  .msg.err { background: var(--err-bg); color: var(--err); }
-  .msg.warn { background: var(--warn-bg); color: var(--warn); }
-  .msg.ok { background: var(--ok-bg); color: var(--ok); }
-
-  details.adv { padding: 14px 20px 18px; border-top: 1px solid var(--line-2); }
-  details.adv summary { cursor: pointer; font-weight: 600; font-size: 14px; }
-  details.adv p { font-size: 13.5px; color: var(--ink-2); margin: 8px 0; }
-
-  /* 미리보기 */
-  .preview { position: sticky; top: 16px; }
-  .preview-head { display: flex; justify-content: space-between; align-items: center; padding: 14px 20px; border-bottom: 1px solid var(--line-2); gap: 12px; flex-wrap: wrap; }
-  .preview-head h2 { font-size: 16px; margin: 0; }
-  .preview-scroll { padding: 24px; overflow: auto; max-height: calc(100vh - 110px); background: #e9ebee; border-radius: 0 0 var(--radius) var(--radius); }
-  .sheet {
-    width: 100%; max-width: 760px; margin: 0 auto; background: #fff;
-    box-shadow: 0 1px 3px rgba(0,0,0,.12); padding: 44px 52px 56px;
-    font-family: "Malgun Gothic", "Apple SD Gothic Neo", sans-serif; color: #000;
-  }
-  .empty { color: var(--ink-3); text-align: center; padding: 80px 20px; }
   .d-banner { display: grid; grid-template-columns: auto 1fr; align-items: stretch; border-top: 3px solid #1f3a64; border-bottom: 1px solid #1f3a64; margin-bottom: 14px; }
   .d-team { padding: 10px 14px; font-size: 13px; color: #1f3a64; font-weight: 700; display: grid; place-items: center; border-right: 1px solid #c9d2e0; }
   .d-titles { padding: 8px 14px; text-align: center; }
@@ -162,26 +171,31 @@
 </style>
 </head>
 <body>
+<script>try { const theme = localStorage.getItem('jkhwpx.theme'); if (theme === 'dark' || (!theme && matchMedia('(prefers-color-scheme: dark)').matches)) document.documentElement.dataset.theme = 'dark'; } catch (_) {}</script>
+<div class="app-window">
 <header class="top">
-  <div class="wrap">
-    <h1>공문 hwpx 생성기</h1>
-    <p>문서 유형을 고르고 AI가 쓴 내용을 붙여넣으면 결재표·표지·개조식 서식이 갖춰진 한글 파일이 만들어집니다. 모든 처리는 이 브라우저 안에서만 이뤄집니다.</p>
-  </div>
+  <div class="traffic-lights" aria-hidden="true"><i></i><i></i><i></i></div>
+  <div class="brand"><span class="brand-mark"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h5"/></svg></span><div><h1>JK HWPX</h1><span class="brand-caption">DOCUMENT STUDIO</span></div></div>
+  <span class="top-divider" aria-hidden="true"></span><span class="app-caption">공문 작성 스튜디오</span>
+  <div class="header-actions"><span class="private-badge"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="11" rx="3"/><path d="M8 10V7a4 4 0 0 1 8 0v3M12 14v3"/></svg>내 브라우저에서 안전하게</span><button class="icon-button" id="themeToggle" type="button" title="다크 모드" aria-label="다크 모드" aria-pressed="false"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 13A8.5 8.5 0 0 1 11 3.5 8.5 8.5 0 1 0 20.5 13Z"/></svg></button></div>
 </header>
-
+<div class="workspace">
+  <aside class="sidebar" aria-label="문서 유형">
+    <div class="sidebar-heading"><h2>문서 유형</h2><span class="count-badge">12</span></div>
+    <div class="groups" id="groups"></div>
+    <div class="sidebar-note"><strong>좋은 문서의 시작, 알맞은 구성</strong>유형을 선택하면 장 구성과 작성 요령을 함께 준비해 드려요.</div>
+  </aside>
+  <div class="main-content">
+    <div class="intro"><div><div class="eyebrow">YOUR WORDS, WELL COMPOSED</div><h2>생각을 문서로, 간결하게.</h2><p>AI가 정리한 내용을 서식이 갖춰진 한글 문서로 완성하세요.</p></div><div class="workflow-badge"><b>01 작성</b><span>→</span><span>02 확인</span><span>→</span><span>03 저장</span></div></div>
 <main class="wrap">
-  <section class="panel" aria-label="입력">
-    <div class="step">
-      <h2><span class="num">1</span>문서 유형 고르기</h2>
-      <p class="desc">장(章) 구성은 기관이 달라도 거의 같습니다. 국가공무원인재개발원 보고서 작성 교재와 부처 계획서 목차를 바탕으로 정리한 12가지 유형입니다.</p>
-      <div class="groups" id="groups"></div>
+  <section class="panel input-panel" aria-label="문서 작성">
+<div class="step">
+      <h2><span class="num">1</span>어떤 문서를 작성할까요?</h2>
       <div class="type-detail" id="typeDetail" hidden></div>
-    </div>
+      <p class="desc">내용과 참고 자료를 적어 요청문을 복사하세요. ChatGPT, Claude, Gemini에 그대로 전달하면 됩니다.</p>
+      <textarea aria-label="작성할 내용과 참고 자료" id="material" class="plain" placeholder="문서의 목적, 주요 내용, 참고 자료를 자유롭게 적어주세요.
 
-    <div class="step">
-      <h2><span class="num">2</span>AI에게 보낼 요청문 만들기</h2>
-      <p class="desc">쓰고 싶은 내용과 참고 자료를 적고 복사하세요. 고른 유형의 장 구성, 작성 규칙, JSON 형식이 함께 복사됩니다. ChatGPT·Claude·Gemini 어디에 붙여넣어도 됩니다.</p>
-      <textarea id="material" class="plain" placeholder="예) 우리 팀(AI전환팀)이 개발한 착한주유소 가격 현황판의 시범운영 결과를 보고하려고 함. 사업관리팀이 가격을 관리함. 아래는 운영 통계와 회의 메모…"></textarea>
+예) 우리 팀의 새 시스템 시범운영 결과를 보고하려고 해요. 운영 통계와 회의 메모는…"></textarea>
       <div class="row">
         <button id="copyPrompt" class="primary">요청문 복사</button>
         <span class="hint" id="promptHint">유형을 고르지 않으면 AI가 알맞은 구성을 정합니다.</span>
@@ -189,9 +203,9 @@
     </div>
 
     <div class="step">
-      <h2><span class="num">3</span>AI가 준 JSON 붙여넣기</h2>
-      <p class="desc">AI 답변 중 JSON 부분을 붙여넣으세요. 앞뒤 설명이나 ``` 표시가 섞여 있어도 알아서 걸러냅니다.</p>
-      <textarea id="json" spellcheck="false" placeholder='{ "title": "…", "sections": [ … ] }'></textarea>
+      <h2><span class="num">2</span>AI 답변 붙여넣기</h2>
+      <p class="desc">AI가 작성한 JSON을 붙여넣으면 오른쪽에 문서가 나타납니다. 코드 블록도 그대로 붙여넣을 수 있어요.</p>
+      <textarea aria-label="AI 답변 JSON" id="json" spellcheck="false" placeholder='{ "title": "…", "sections": [ … ] }'></textarea>
       <div class="row">
         <button id="formatJson">정리하기</button>
         <button id="loadExample">예시 불러오기</button>
@@ -201,11 +215,11 @@
     </div>
 
     <div class="step">
-      <h2><span class="num">4</span>한글 파일 내려받기</h2>
-      <p class="desc">파일 이름은 "(부서)제목_날짜시각" 형식으로 자동으로 정해집니다.</p>
+      <h2><span class="num">3</span>문서 완성하기</h2>
+      <p class="desc">파일 이름을 확인하고 한글에서 바로 열어보세요.</p>
       <input type="text" id="fileName" aria-label="파일 이름">
       <div class="row">
-        <button id="download" class="primary big" disabled>hwpx 내려받기</button>
+        <button id="download" class="primary big" disabled>HWPX 내려받기</button>
       </div>
     </div>
 
@@ -222,16 +236,18 @@
   </section>
 
   <section class="panel preview" aria-label="미리보기">
-    <div class="preview-head">
-      <h2>미리보기</h2>
-      <span class="hint">구성을 확인하는 용도입니다. 실제 모양은 한글에서 확인하세요.</span>
-    </div>
+    <div class="preview-head"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h5"/></svg><h2>문서 미리보기</h2><span class="preview-meta">HWPX</span></div>
     <div class="preview-scroll">
-      <div class="sheet" id="sheet"><div class="empty">문서 유형을 고르고 "빈 틀 불러오기"를 누르거나, AI가 준 JSON을 붙여넣으면 여기에 문서 구성이 보입니다.</div></div>
+      <div class="sheet" id="sheet"><div class="empty"><div class="empty-icon" aria-hidden="true"></div><strong>곧, 한 장의 문서가 됩니다.</strong>AI 답변을 붙여넣거나 예시를 불러오세요.<br>문서의 구성을 여기에서 확인할 수 있어요.</div></div>
     </div>
+    <div class="preview-foot"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7h.01"/></svg>구성 확인용 미리보기입니다. 실제 서식은 한글에서 확인하세요.</div>
   </section>
 </main>
-<div class="toast" id="toast"></div>
+  </div>
+</div>
+<footer class="statusbar"><span><span class="status-dot"></span>브라우저에서 처리 · 서버 전송 없음</span><span class="status-detail">HWPX 공문 생성기</span><a href="https://github.com/joongyu01/hwpx" target="_blank" rel="noopener noreferrer">GitHub ↗</a></footer>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>/*__CORE__*/</script>
 <script>/*__DOCTYPES__*/</script>
@@ -245,12 +261,27 @@ const PROMPT_GUIDE = /*__PROMPT__*/"";
   const G = window.HwpxGongmun;
   const D = window.GongmunDocTypes;
   const $ = (id) => document.getElementById(id);
+  const emptyPreview = $('sheet').innerHTML;
   const b64ToBytes = (b64) => Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
 
   const store = {
     get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
     set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} },
   };
+
+  const themeToggle = $('themeToggle');
+  const syncThemeToggle = () => {
+    const dark = document.documentElement.dataset.theme === 'dark';
+    themeToggle.setAttribute('aria-pressed', String(dark));
+    document.querySelector('meta[name="theme-color"]').content = dark ? '#1b1f27' : '#f5f6f8';
+  };
+  syncThemeToggle();
+  themeToggle.addEventListener('click', () => {
+    const theme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+    document.documentElement.dataset.theme = theme;
+    store.set('jkhwpx.theme', theme);
+    syncThemeToggle();
+  });
 
   let template = null;
   let templateName = '기본 서식';
@@ -303,10 +334,10 @@ const PROMPT_GUIDE = /*__PROMPT__*/"";
       ).join('') + '</ol>' +
       (t.extras && t.extras.length ? '<p class="extras">필요하면 추가: ' + esc(t.extras.join(', ')) + '</p>' : '') +
       '<p class="basis">근거: ' + esc(t.basis) + '</p>' +
-      '<div class="row"><button type="button" id="loadSkeleton">빈 틀 불러오기</button><span class="hint">장 구성과 작성 요령이 담긴 틀을 3번에 넣습니다.</span></div>';
+      '<div class="row"><button type="button" id="loadSkeleton">빈 틀 불러오기</button><span class="hint">장 구성과 작성 요령이 담긴 틀을 AI 답변 칸에 넣습니다.</span></div>';
     $('loadSkeleton').addEventListener('click', () => {
       const current = $('json').value.trim();
-      if (current && !confirm('3번에 입력된 JSON을 빈 틀로 바꿀까요?')) return;
+      if (current && !confirm('입력된 JSON을 빈 틀로 바꿀까요?')) return;
       $('json').value = JSON.stringify(D.skeleton(t.id), null, 2);
       fileNameTouched = false;
       refresh();
@@ -412,8 +443,8 @@ const PROMPT_GUIDE = /*__PROMPT__*/"";
     currentSpec = null;
     $('download').disabled = true;
     $('stat').textContent = '';
+    $('sheet').innerHTML = emptyPreview;
     if (!raw.trim()) {
-      $('sheet').innerHTML = '<div class="empty">문서 유형을 고르고 "빈 틀 불러오기"를 누르거나, AI가 준 JSON을 붙여넣으면 여기에 문서 구성이 보입니다.</div>';
       return;
     }
     let spec;
@@ -442,6 +473,7 @@ const PROMPT_GUIDE = /*__PROMPT__*/"";
   $('fileName').addEventListener('input', () => { fileNameTouched = true; });
 
   $('loadExample').addEventListener('click', () => {
+    if ($('json').value.trim() && !confirm('작성 중인 내용을 예시로 바꿀까요?')) return;
     $('json').value = JSON.stringify(EXAMPLE, null, 2);
     fileNameTouched = false;
     refresh();
