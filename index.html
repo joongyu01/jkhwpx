@@ -1,0 +1,1656 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f5f6f8">
+<title>JK HWPX · 공문 작성 스튜디오</title>
+<style>
+  :root {
+    --ink: #24262b; --ink-2: #616773; --ink-3: #747b87;
+    --line: #dce0e7; --line-2: #e9ecf1;
+    --paper: #ffffff; --ground: #f5f6f8; --field: #f8f9fb;
+    --sidebar: rgba(239,242,247,.88); --chrome: rgba(255,255,255,.82);
+    --accent: #0869e8; --accent-hover: #0058c9; --accent-2: #e9f1ff;
+    --ok: #287549; --ok-bg: #eaf6ee; --warn: #8a5a00; --warn-bg: #fbf1dc;
+    --err: #b52c32; --err-bg: #fff0f0; --radius: 14px;
+    --shadow: 0 3px 12px rgba(23,39,66,.04), 0 1px 2px rgba(23,39,66,.03);
+    --workspace: #e9edf2; color-scheme: light;
+  }
+  :root[data-theme="dark"] {
+    --ink: #eff1f5; --ink-2: #bac1cd; --ink-3: #9ba5b6;
+    --line: #3b414e; --line-2: #303642; --paper: #252a34; --ground: #1b1f27;
+    --field: #20252e; --sidebar: rgba(32,37,47,.94); --chrome: rgba(37,42,52,.9);
+    --accent: #478eff; --accent-hover: #2d7df6; --accent-2: #243954;
+    --ok: #8bd5a9; --ok-bg: #213c2f; --warn: #edc47c; --warn-bg: #433921;
+    --err: #ffabb0; --err-bg: #472a30; --workspace: #181d25;
+    --shadow: 0 4px 18px rgba(0,0,0,.1); color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--ground); color: var(--ink); font: 13px/1.6 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", "Malgun Gothic", sans-serif; -webkit-font-smoothing: antialiased; }
+  button, input, textarea { font: inherit; }
+  button, .filebtn { border: 1px solid var(--line); border-radius: 8px; background: var(--paper); color: var(--ink); padding: 8px 12px; cursor: pointer; transition: background .15s, border-color .15s, box-shadow .15s; }
+  button:hover:not(:disabled), .filebtn:hover { background: var(--field); border-color: var(--ink-3); }
+  button:focus-visible, a:focus-visible, summary:focus-visible, .filebtn:focus-within { outline: 3px solid var(--accent); outline-offset: 3px; }
+  button.primary { background: var(--accent); border-color: var(--accent); color: white; font-weight: 600; box-shadow: 0 2px 5px rgba(0,90,220,.12); }
+  button.primary:hover:not(:disabled) { background: var(--accent-hover); border-color: var(--accent-hover); }
+  button:disabled { opacity: .42; cursor: not-allowed; box-shadow: none; }
+  svg.icon { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+  .app-window { margin: 22px auto; width: calc(100% - 44px); max-width: 1700px; height: calc(100dvh - 44px); min-height: 580px; display: flex; flex-direction: column; border: 1px solid var(--line); border-radius: 16px; overflow: hidden; box-shadow: 0 24px 80px rgba(27,43,72,.12), 0 3px 14px rgba(27,43,72,.06); }
+  header.top { display: flex; align-items: center; gap: 18px; min-height: 62px; padding: 0 22px; background: var(--chrome); border-bottom: 1px solid var(--line); backdrop-filter: blur(24px); flex-shrink: 0; }
+  .traffic-lights { display: flex; gap: 7px; padding-right: 10px; }
+  .traffic-lights i { width: 11px; height: 11px; border-radius: 50%; background: #ff6058; box-shadow: inset 0 0 0 1px rgba(0,0,0,.08); }
+  .traffic-lights i:nth-child(2) { background: #ffbd2e; } .traffic-lights i:nth-child(3) { background: #28c840; }
+  .brand { display: flex; align-items: center; gap: 10px; }
+  .brand-mark { width: 31px; height: 34px; display: grid; place-items: center; color: white; background: linear-gradient(145deg,#59a3ff,#1265df); border-radius: 9px; box-shadow: 0 2px 6px #1766dc30; }
+  header.top h1 { font-size: 15px; font-weight: 700; letter-spacing: -.4px; margin: 0; line-height: 1.2; }
+  .brand-caption { font-size: 10px; color: var(--ink-3); letter-spacing: .6px; }
+  .top-divider { width: 1px; height: 24px; background: var(--line); }
+  .app-caption { color: var(--ink-2); font-size: 12px; }
+  .header-actions { display: flex; align-items: center; gap: 12px; margin-left: auto; }
+  .private-badge { display: flex; align-items: center; gap: 6px; color: var(--ink-2); font-size: 11px; }
+  .private-badge .icon { width: 13px; height: 13px; color: var(--ok); }
+  .icon-button { display: grid; place-items: center; width: 32px; height: 32px; padding: 0; background: transparent; border-color: transparent; }
+  .workspace { display: grid; grid-template-columns: 218px minmax(0,1fr); flex: 1; min-height: 0; }
+  .sidebar { min-height: 0; overflow-y: auto; padding: 26px 13px 18px; background: var(--sidebar); border-right: 1px solid var(--line); }
+  .sidebar-heading { display: flex; align-items: center; justify-content: space-between; padding: 0 11px 16px; }
+  .sidebar-heading h2 { font-size: 12px; margin: 0; font-weight: 600; color: var(--ink-2); }
+  .count-badge { font-size: 10px; color: var(--ink-3); border: 1px solid var(--line); border-radius: 5px; padding: 0 5px; }
+  .groups { display: grid; gap: 22px; }
+  .group .gname { font-size: 10px; color: var(--ink-3); font-weight: 600; padding: 0 11px 6px; letter-spacing: .3px; }
+  .chips { display: grid; gap: 3px; }
+  .chip { position: relative; display: flex; align-items: center; gap: 9px; text-align: left; width: 100%; border: 1px solid transparent; background: transparent; font-size: 12px; padding: 8px 10px; border-radius: 7px; line-height: 1.5; }
+  .chip::before { content: ''; display: block; width: 11px; height: 14px; border: 1.3px solid currentColor; border-radius: 2px; flex-shrink: 0; opacity: .55; }
+  .chip:hover:not(:disabled) { background: var(--line-2); border-color: transparent; }
+  .chip[aria-pressed="true"], .chip[aria-pressed="true"]:hover { background: var(--accent); border-color: var(--accent); color: white; font-weight: 600; box-shadow: 0 2px 5px #0062dd1a; }
+  .sidebar-note { margin: 28px 10px 0; padding-top: 18px; border-top: 1px solid var(--line); font-size: 11px; color: var(--ink-3); }
+  .sidebar-note strong { color: var(--ink-2); font-weight: 500; display: block; margin-bottom: 4px; }
+  .main-content { min-width: 0; min-height: 0; overflow-y: auto; padding: 26px 28px 32px; }
+  .intro { display: flex; align-items: center; gap: 20px; justify-content: space-between; margin-bottom: 24px; }
+  .eyebrow { color: var(--accent); font-size: 10px; letter-spacing: 1.5px; font-weight: 700; margin-bottom: 5px; }
+  .intro h2 { font-size: 25px; letter-spacing: -1px; margin: 0 0 5px; font-weight: 650; }
+  .intro p { color: var(--ink-2); font-size: 12px; margin: 0; }
+  .workflow-badge { color: var(--ink-3); display: flex; align-items: center; gap: 8px; font-size: 11px; white-space: nowrap; }
+  .workflow-badge b { font-weight: 500; color: var(--accent); background: var(--accent-2); border-radius: 6px; padding: 5px 8px; }
+  main.wrap { display: grid; grid-template-columns: minmax(320px,.85fr) minmax(350px,1.15fr); gap: 22px; align-items: start; }
+  .panel { background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); min-width: 0; }
+  .input-panel { overflow: hidden; }
+  .step { padding: 22px; }
+  .step + .step { border-top: 1px solid var(--line-2); }
+  .step h2 { display: flex; align-items: center; gap: 8px; font-size: 13px; margin: 0 0 9px; letter-spacing: -.2px; }
+  .step h2 .num { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 6px; background: var(--accent-2); color: var(--accent); font-size: 10px; font-weight: 600; flex: none; }
+  .step .desc { margin: 0 0 14px; color: var(--ink-2); font-size: 11px; line-height: 1.8; }
+  .type-detail { margin-bottom: 20px; border: 1px solid var(--line); border-radius: 10px; background: var(--field); padding: 14px; }
+  .type-detail[hidden] { display: none; }
+  .type-detail .when { font-size: 12px; color: var(--ink-2); margin: 0 0 10px; }
+  .toc { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+  .toc li { display: grid; grid-template-columns: 20px 1fr; gap: 4px; font-size: 11px; }
+  .toc .rn { color: var(--accent); font-weight: 600; } .toc .st { font-weight: 600; }
+  .toc .gd { display: none; } .toc .opt { font-size: 10px; color: var(--warn); background: var(--warn-bg); padding: 0 4px; border-radius: 3px; margin-left: 4px; }
+  .type-detail .extras, .type-detail .basis { font-size: 10px; color: var(--ink-3); margin: 8px 0 0; }
+  textarea, input[type=text] { width: 100%; font: 12px/1.8 ui-monospace, SFMono-Regular, Consolas, "Malgun Gothic", monospace; color: var(--ink); background: var(--field); border: 1px solid var(--line); border-radius: 8px; padding: 12px; resize: vertical; }
+  textarea::placeholder, input::placeholder { color: var(--ink-3); }
+  textarea.plain { font-family: inherit; font-size: 12px; }
+  textarea:focus, input:focus { outline: 3px solid var(--accent-2); border-color: var(--accent); }
+  #material { min-height: 118px; } #json { min-height: 190px; tab-size: 2; } #fileName { font-family: inherit; font-size: 11px; }
+  .row { display: flex; gap: 7px; flex-wrap: wrap; align-items: center; margin-top: 10px; }
+  .row button, .filebtn { font-size: 11px; }
+  .hint { color: var(--ink-3); font-size: 10px; line-height: 1.7; }
+  #promptHint { display: block; width: 100%; margin-top: 3px; }
+  .big { padding: 11px 16px; } #download { width: 100%; font-size: 12px; }
+  .filebtn { position: relative; display: inline-flex; align-items: center; }
+  .filebtn input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+  .msgs { margin-top: 12px; display: grid; gap: 6px; } .msgs:empty { display: none; }
+  .msg { font-size: 11px; padding: 9px 11px; border-radius: 7px; overflow-wrap: anywhere; }
+  .msg.err { background: var(--err-bg); color: var(--err); } .msg.warn { background: var(--warn-bg); color: var(--warn); } .msg.ok { background: var(--ok-bg); color: var(--ok); }
+  details.adv { padding: 16px 22px; border-top: 1px solid var(--line-2); background: var(--field); }
+  details.adv summary { cursor: pointer; font-weight: 500; font-size: 11px; }
+  details.adv p { font-size: 11px; color: var(--ink-2); margin: 10px 0; }
+  .preview { position: sticky; top: 0; overflow: hidden; }
+  .preview-head { display: flex; align-items: center; padding: 15px 18px; border-bottom: 1px solid var(--line); gap: 8px; }
+  .preview-head h2 { font-size: 12px; font-weight: 600; margin: 0; }
+  .preview-head .icon { width: 15px; color: var(--ink-3); }
+  .preview-meta { margin-left: auto; font-size: 10px; color: var(--ink-3); background: var(--field); padding: 2px 7px; border: 1px solid var(--line-2); border-radius: 5px; }
+  .preview-scroll { padding: 28px; overflow: auto; max-height: calc(100dvh - 310px); min-height: 440px; background: var(--workspace); }
+  .sheet { width: 100%; min-width: 280px; max-width: 760px; min-height: 560px; margin: 0 auto; background: white; box-shadow: 0 4px 20px rgba(16,30,52,.09),0 0 0 1px rgba(16,30,52,.03); padding: 32px 28px 44px; font-family: "Malgun Gothic", "Apple SD Gothic Neo", sans-serif; color: #000; }
+  .sheet:has(.empty) { display: grid; place-items: center; }
+  .empty { color: #87909e; text-align: center; padding: 60px 12px; font-size: 12px; line-height: 1.9; }
+  .empty-icon { width: 58px; height: 68px; margin: 0 auto 22px; border: 1px solid #d9e0e9; border-radius: 7px; position: relative; background: linear-gradient(145deg,#fff,#f5f7fb); box-shadow: 0 5px 12px #263b5d08; }
+  .empty-icon::before { content: ''; position: absolute; left: 13px; right: 13px; top: 24px; height: 2px; background: #cfd9e7; box-shadow: 0 9px #dce3ed, 0 18px #dce3ed; }
+  .empty strong { display: block; color: #657183; font-size: 14px; font-weight: 500; margin-bottom: 7px; }
+  .preview-foot { border-top: 1px solid var(--line); padding: 11px 18px; font-size: 10px; color: var(--ink-3); display: flex; gap: 6px; align-items: center; }
+  .preview-foot .icon { width: 12px; height: 12px; }
+  .statusbar { display: flex; align-items: center; justify-content: space-between; padding: 7px 18px; color: var(--ink-3); font-size: 10px; background: var(--chrome); border-top: 1px solid var(--line); flex-shrink: 0; }
+  .status-dot { display: inline-block; width: 5px; height: 5px; background: #42b77b; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
+  .statusbar a { color: var(--ink-3); text-decoration: none; } .statusbar a:hover { color: var(--accent); }
+  @media (min-width: 1600px) { .main-content { padding: 32px 40px; } main.wrap { gap: 28px; } .sheet { padding: 44px; } }
+  @media (max-width: 1190px) { .workspace { grid-template-columns: 192px minmax(0,1fr); } .main-content { padding: 22px 18px; } main.wrap { grid-template-columns: minmax(290px,.9fr) minmax(300px,1.1fr); gap: 16px; } .workflow-badge { display: none; } .preview-scroll { padding: 18px; } .step { padding: 18px; } }
+  @media (max-width: 960px) { .app-window { margin: 0; width: 100%; height: auto; min-height: 100dvh; border: 0; border-radius: 0; } .workspace { grid-template-columns: 178px minmax(0,1fr); } .sidebar { overflow: visible; } .main-content { overflow: visible; } main.wrap { grid-template-columns: 1fr; } .preview { position: static; } .preview-scroll { max-height: 740px; } .private-badge { display: none; } .app-caption { font-size: 11px; } }
+  @media (max-width: 620px) { header.top { gap: 10px; min-height: 58px; padding: 0 16px; } .traffic-lights, .top-divider, .app-caption { display: none; } .workspace { display: block; } .sidebar { padding: 16px; border-right: 0; border-bottom: 1px solid var(--line); } .sidebar-heading { padding: 0 0 10px; } .groups { display: flex; overflow-x: auto; gap: 18px; padding-bottom: 6px; } .group { flex: 0 0 auto; } .group .gname { padding-left: 6px; } .chips { display: flex; } .chip { width: auto; white-space: nowrap; padding: 8px; } .chip::before { display: none; } .sidebar-note { display: none; } .main-content { padding: 22px 14px; } .intro h2 { font-size: 23px; } .intro { margin-bottom: 18px; } .preview-scroll { padding: 16px; min-height: 400px; } .sheet { min-width: 0; padding: 24px 18px; } .statusbar { padding: 9px 14px; } .statusbar .status-detail { display: none; } }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; scroll-behavior: auto !important; } }
+
+  .d-banner { display: grid; grid-template-columns: auto 1fr; align-items: stretch; border-top: 3px solid #1f3a64; border-bottom: 1px solid #1f3a64; margin-bottom: 14px; }
+  .d-team { padding: 10px 14px; font-size: 13px; color: #1f3a64; font-weight: 700; display: grid; place-items: center; border-right: 1px solid #c9d2e0; }
+  .d-titles { padding: 8px 14px; text-align: center; }
+  .d-sub { font-size: 14px; color: #333; }
+  .d-title { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+  .d-summary { border: 1px solid #9aa7bb; background: #f5f7fb; padding: 10px 14px; font-size: 14.5px; margin-bottom: 18px; }
+  .d-summary b { color: #1f3a64; margin-right: 4px; }
+  .d-sec { display: flex; align-items: stretch; margin: 20px 0 8px; }
+  .d-sec .n { background: #1f3a64; color: #fff; width: 32px; display: grid; place-items: center; font-weight: 700; }
+  .d-sec .t { flex: 1; border-bottom: 2px solid #1f3a64; padding: 3px 10px; font-size: 17px; font-weight: 700; }
+  .d-box { font-size: 15px; margin: 8px 0 2px; padding-left: 1.6em; text-indent: -1.6em; }
+  .d-box .lb { font-weight: 700; }
+  .d-sub-i { font-size: 15px; margin: 2px 0; padding-left: 3.1em; text-indent: -1.4em; }
+  .d-note { font-size: 13px; margin: 2px 0; padding-left: 2.6em; text-indent: -1.2em; color: #222; }
+  .d-text { font-size: 15px; margin: 8px 0; }
+  .d-table { width: 100%; border-collapse: collapse; margin: 8px 0 6px; font-size: 13px; }
+  .d-table th, .d-table td { border: 1px solid #555; padding: 5px 8px; vertical-align: middle; }
+  .d-table th { background: #dfe5ee; font-weight: 700; text-align: center; }
+  .d-table td.key { text-align: center; font-weight: 700; background: #f4f6f9; }
+  .d-table ul { margin: 0; padding-left: 1.1em; }
+  .d-attach { margin-top: 22px; font-size: 15px; white-space: pre; }
+  .d-page { border-top: 2px dashed #9aa7bb; margin: 26px 0 14px; padding-top: 4px; font-size: 11px; color: #6b7686; }
+  .d-brief-title { border: 2px solid #1f3a64; background: #eef2f8; text-align: center; padding: 8px 10px; margin-bottom: 10px; }
+  .d-brief-title .s { font-size: 14px; } .d-brief-title .t { font-size: 18px; font-weight: 700; }
+  .d-cmp { border: 1px solid #777; background: #fbf6e6; padding: 6px 12px; margin: 8px 0 12px; font-size: 13.5px; }
+  .d-cmp p { margin: 2px 0; } .d-cmp .lb { font-weight: 700; }
+  .d-bhead { font-size: 16px; font-weight: 700; margin: 14px 0 6px; }
+  .d-bitem { font-size: 14.5px; margin: 5px 0; padding-left: 2.6em; text-indent: -1.6em; }
+  .d-bitem .lb { font-weight: 700; }
+  .d-apx { display: flex; border: 1px solid #555; margin: 4px 0 10px; }
+  .d-apx .n { background: #1f3a64; color: #fff; padding: 4px 12px; font-weight: 700; }
+  .d-apx .t { padding: 4px 12px; font-weight: 700; font-size: 16px; }
+  .d-sheet b.em, p b.em { font-weight: 700; }
+  .d-appr { display: flex; justify-content: flex-end; margin-bottom: 18px; font-size: 12px; }
+  .d-appr div { border: 1px solid #777; margin-left: -1px; min-width: 78px; text-align: center; }
+  .d-appr .p { background: #f1f3f6; border-bottom: 1px solid #777; padding: 2px 4px; }
+  .d-appr .nm { padding: 8px 4px; min-height: 34px; }
+  .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #1d232b; color: #fff; padding: 9px 16px; border-radius: 8px; font-size: 14px; opacity: 0; transition: opacity .2s; pointer-events: none; }
+  .toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+<script>try { const theme = localStorage.getItem('jkhwpx.theme'); if (theme === 'dark' || (!theme && matchMedia('(prefers-color-scheme: dark)').matches)) document.documentElement.dataset.theme = 'dark'; } catch (_) {}</script>
+<div class="app-window">
+<header class="top">
+  <div class="traffic-lights" aria-hidden="true"><i></i><i></i><i></i></div>
+  <div class="brand"><span class="brand-mark"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h5"/></svg></span><div><h1>JK HWPX</h1><span class="brand-caption">DOCUMENT STUDIO</span></div></div>
+  <span class="top-divider" aria-hidden="true"></span><span class="app-caption">공문 작성 스튜디오</span>
+  <div class="header-actions"><span class="private-badge"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="11" rx="3"/><path d="M8 10V7a4 4 0 0 1 8 0v3M12 14v3"/></svg>내 브라우저에서 안전하게</span><button class="icon-button" id="themeToggle" type="button" title="다크 모드" aria-label="다크 모드" aria-pressed="false"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 13A8.5 8.5 0 0 1 11 3.5 8.5 8.5 0 1 0 20.5 13Z"/></svg></button></div>
+</header>
+<div class="workspace">
+  <aside class="sidebar" aria-label="문서 유형">
+    <div class="sidebar-heading"><h2>문서 유형</h2><span class="count-badge">12</span></div>
+    <div class="groups" id="groups"></div>
+    <div class="sidebar-note"><strong>좋은 문서의 시작, 알맞은 구성</strong>유형을 선택하면 장 구성과 작성 요령을 함께 준비해 드려요.</div>
+  </aside>
+  <div class="main-content">
+    <div class="intro"><div><div class="eyebrow">YOUR WORDS, WELL COMPOSED</div><h2>생각을 문서로, 간결하게.</h2><p>AI가 정리한 내용을 서식이 갖춰진 한글 문서로 완성하세요.</p></div><div class="workflow-badge"><b>01 작성</b><span>→</span><span>02 확인</span><span>→</span><span>03 저장</span></div></div>
+<main class="wrap">
+  <section class="panel input-panel" aria-label="문서 작성">
+<div class="step">
+      <h2><span class="num">1</span>어떤 문서를 작성할까요?</h2>
+      <div class="type-detail" id="typeDetail" hidden></div>
+      <p class="desc">내용과 참고 자료를 적어 요청문을 복사하세요. ChatGPT, Claude, Gemini에 그대로 전달하면 됩니다.</p>
+      <textarea aria-label="작성할 내용과 참고 자료" id="material" class="plain" placeholder="문서의 목적, 주요 내용, 참고 자료를 자유롭게 적어주세요.
+
+예) 우리 팀의 새 시스템 시범운영 결과를 보고하려고 해요. 운영 통계와 회의 메모는…"></textarea>
+      <div class="row">
+        <button id="copyPrompt" class="primary">요청문 복사</button>
+        <span class="hint" id="promptHint">유형을 고르지 않으면 AI가 알맞은 구성을 정합니다.</span>
+      </div>
+    </div>
+
+    <div class="step">
+      <h2><span class="num">2</span>AI 답변 붙여넣기</h2>
+      <p class="desc">AI가 작성한 JSON을 붙여넣으면 오른쪽에 문서가 나타납니다. 코드 블록도 그대로 붙여넣을 수 있어요.</p>
+      <textarea aria-label="AI 답변 JSON" id="json" spellcheck="false" placeholder='{ "title": "…", "sections": [ … ] }'></textarea>
+      <div class="row">
+        <button id="formatJson">정리하기</button>
+        <button id="loadExample">예시 불러오기</button>
+        <span class="hint" id="stat"></span>
+      </div>
+      <div class="msgs" id="msgs" aria-live="polite"></div>
+    </div>
+
+    <div class="step">
+      <h2><span class="num">3</span>문서 완성하기</h2>
+      <p class="desc">파일 이름을 확인하고 한글에서 바로 열어보세요.</p>
+      <input type="text" id="fileName" aria-label="파일 이름">
+      <div class="row">
+        <button id="download" class="primary big" disabled>HWPX 내려받기</button>
+      </div>
+    </div>
+
+    <details class="adv">
+      <summary>우리 부서 서식 쓰기</summary>
+      <p>이 생성기용으로 준비한 서식 hwpx를 올리면 그 모양으로 만듭니다. 서식 만드는 법은 스킬 폴더의 <code>references/template-guide.md</code>에 있습니다.</p>
+      <div class="row">
+        <label class="filebtn">서식 파일 선택<input type="file" id="tplFile" accept=".hwpx"></label>
+        <button id="tplReset">기본 서식으로</button>
+        <button id="tplDownload">기본 서식 내려받기</button>
+      </div>
+      <div class="msgs" id="tplMsg"></div>
+    </details>
+  </section>
+
+  <section class="panel preview" aria-label="미리보기">
+    <div class="preview-head"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h5"/></svg><h2>문서 미리보기</h2><span class="preview-meta">HWPX</span></div>
+    <div class="preview-scroll">
+      <div class="sheet" id="sheet"><div class="empty"><div class="empty-icon" aria-hidden="true"></div><strong>곧, 한 장의 문서가 됩니다.</strong>AI 답변을 붙여넣거나 예시를 불러오세요.<br>문서의 구성을 여기에서 확인할 수 있어요.</div></div>
+    </div>
+    <div class="preview-foot"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7h.01"/></svg>구성 확인용 미리보기입니다. 실제 서식은 한글에서 확인하세요.</div>
+  </section>
+</main>
+  </div>
+</div>
+<footer class="statusbar"><span><span class="status-dot"></span>브라우저에서 처리 · 서버 전송 없음</span><span class="status-detail">HWPX 공문 생성기</span><a href="https://github.com/joongyu01/jkhwpx" target="_blank" rel="noopener noreferrer">GitHub ↗</a></footer>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>/*
+ * hwpx-gongmun core
+ * 서식 원형(hwpx)의 문단·표를 복제하고 글자만 바꿔 공문을 만든다.
+ * Node(18+)와 브라우저에서 똑같이 동작하며 외부 의존성이 없다.
+ */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory();
+  else root.HwpxGongmun = factory();
+})(typeof self !== 'undefined' ? self : this, function () {
+  'use strict';
+
+  const te = new TextEncoder();
+  const td = new TextDecoder('utf-8');
+
+  /* ------------------------------------------------------------------ */
+  /* 압축 (hwpx = zip)                                                   */
+  /* ------------------------------------------------------------------ */
+
+  const CRC_TABLE = (() => {
+    const t = new Uint32Array(256);
+    for (let n = 0; n < 256; n++) {
+      let c = n;
+      for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1;
+      t[n] = c >>> 0;
+    }
+    return t;
+  })();
+
+  function crc32(bytes) {
+    let c = 0xFFFFFFFF;
+    for (let i = 0; i < bytes.length; i++) c = CRC_TABLE[(c ^ bytes[i]) & 0xFF] ^ (c >>> 8);
+    return (c ^ 0xFFFFFFFF) >>> 0;
+  }
+
+  async function pipe(bytes, stream) {
+    const res = new Response(new Blob([bytes]).stream().pipeThrough(stream));
+    return new Uint8Array(await res.arrayBuffer());
+  }
+
+  function defaultCodec() {
+    if (typeof process !== 'undefined' && process.versions && process.versions.node) {
+      const zlib = require('zlib');
+      return {
+        deflateRaw: async (b) => new Uint8Array(zlib.deflateRawSync(b, { level: 9 })),
+        inflateRaw: async (b) => new Uint8Array(zlib.inflateRawSync(b)),
+      };
+    }
+    if (typeof CompressionStream !== 'undefined') {
+      return {
+        deflateRaw: (b) => pipe(b, new CompressionStream('deflate-raw')),
+        inflateRaw: (b) => pipe(b, new DecompressionStream('deflate-raw')),
+      };
+    }
+    return { deflateRaw: null, inflateRaw: null };
+  }
+
+  async function unzip(bytes, codec) {
+    codec = codec || defaultCodec();
+    const dv = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+    let eocd = -1;
+    for (let i = bytes.length - 22; i >= Math.max(0, bytes.length - 65557); i--) {
+      if (dv.getUint32(i, true) === 0x06054b50) { eocd = i; break; }
+    }
+    if (eocd < 0) {
+      throw new Error('hwpx 파일로 읽을 수 없습니다. 암호화(DRM)가 걸려 있거나 hwp(구버전) 파일일 수 있습니다. 한글에서 "다른 이름으로 저장 → hwpx"로 저장한 파일을 사용하세요.');
+    }
+    const count = dv.getUint16(eocd + 10, true);
+    let p = dv.getUint32(eocd + 16, true);
+    const files = {};
+    const order = [];
+    for (let n = 0; n < count; n++) {
+      if (dv.getUint32(p, true) !== 0x02014b50) throw new Error('zip 목록이 손상되었습니다.');
+      const method = dv.getUint16(p + 10, true);
+      const csize = dv.getUint32(p + 20, true);
+      const nlen = dv.getUint16(p + 28, true);
+      const elen = dv.getUint16(p + 30, true);
+      const clen = dv.getUint16(p + 32, true);
+      const off = dv.getUint32(p + 42, true);
+      const name = td.decode(bytes.subarray(p + 46, p + 46 + nlen));
+      p += 46 + nlen + elen + clen;
+      if (name.endsWith('/')) continue;
+      const start = off + 30 + dv.getUint16(off + 26, true) + dv.getUint16(off + 28, true);
+      const raw = bytes.subarray(start, start + csize);
+      let data;
+      if (method === 0) data = raw.slice();
+      else if (method === 8) {
+        if (!codec.inflateRaw) throw new Error('이 브라우저는 압축 해제를 지원하지 않습니다. 최신 Chrome·Edge를 사용하세요.');
+        data = await codec.inflateRaw(raw);
+      } else throw new Error('지원하지 않는 압축 방식입니다: ' + method);
+      files[name] = data;
+      order.push(name);
+    }
+    return { files, order };
+  }
+
+  // mimetype 은 무압축으로 맨 앞에 두어야 한글이 hwpx 로 인식한다.
+  async function zip(entries, codec) {
+    codec = codec || defaultCodec();
+    const parts = [];
+    const central = [];
+    let offset = 0;
+    for (const { name, data } of entries) {
+      const store = name === 'mimetype' || !codec.deflateRaw;
+      const comp = store ? data : await codec.deflateRaw(data);
+      const nameBytes = te.encode(name);
+      const crc = crc32(data);
+
+      const lh = new DataView(new ArrayBuffer(30));
+      lh.setUint32(0, 0x04034b50, true);
+      lh.setUint16(4, 20, true);
+      lh.setUint16(6, 0, true);
+      lh.setUint16(8, store ? 0 : 8, true);
+      lh.setUint16(10, 0, true);
+      lh.setUint16(12, 0x2821, true);
+      lh.setUint32(14, crc, true);
+      lh.setUint32(18, comp.length, true);
+      lh.setUint32(22, data.length, true);
+      lh.setUint16(26, nameBytes.length, true);
+      lh.setUint16(28, 0, true);
+      parts.push(new Uint8Array(lh.buffer), nameBytes, comp);
+
+      const ch = new DataView(new ArrayBuffer(46));
+      ch.setUint32(0, 0x02014b50, true);
+      ch.setUint16(4, 20, true);
+      ch.setUint16(6, 20, true);
+      ch.setUint16(8, 0, true);
+      ch.setUint16(10, store ? 0 : 8, true);
+      ch.setUint16(12, 0, true);
+      ch.setUint16(14, 0x2821, true);
+      ch.setUint32(16, crc, true);
+      ch.setUint32(20, comp.length, true);
+      ch.setUint32(24, data.length, true);
+      ch.setUint16(28, nameBytes.length, true);
+      ch.setUint32(42, offset, true);
+      central.push(new Uint8Array(ch.buffer), nameBytes);
+
+      offset += 30 + nameBytes.length + comp.length;
+    }
+    const cdSize = central.reduce((a, b) => a + b.length, 0);
+    const end = new DataView(new ArrayBuffer(22));
+    end.setUint32(0, 0x06054b50, true);
+    end.setUint16(8, entries.length, true);
+    end.setUint16(10, entries.length, true);
+    end.setUint32(12, cdSize, true);
+    end.setUint32(16, offset, true);
+
+    const all = parts.concat(central, [new Uint8Array(end.buffer)]);
+    const out = new Uint8Array(all.reduce((a, b) => a + b.length, 0));
+    let pos = 0;
+    for (const a of all) { out.set(a, pos); pos += a.length; }
+    return out;
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* XML 조작                                                            */
+  /* ------------------------------------------------------------------ */
+
+  const esc = (s) => String(s == null ? '' : s)
+    .replace(/[\r\n\t]+/g, ' ')
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+  const unesc = (s) => s.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&amp;/g, '&');
+
+  // 표 셀 안의 문단은 건너뛰고 본문 최상위 문단만 잘라낸다.
+  function topParagraphs(xml) {
+    const re = /<(\/?)(hp:p|hp:subList)\b([^>]*)>/g;
+    const out = [];
+    let m, sub = 0, depth = 0, start = -1;
+    while ((m = re.exec(xml))) {
+      const close = m[1] === '/';
+      const selfClose = m[3].endsWith('/');
+      if (m[2] === 'hp:subList') {
+        if (close) sub--; else if (!selfClose) sub++;
+        continue;
+      }
+      if (sub !== 0 || selfClose) continue;
+      if (!close) { if (depth === 0) start = m.index; depth++; }
+      else { depth--; if (depth === 0) out.push({ start, end: re.lastIndex, xml: xml.slice(start, re.lastIndex) }); }
+    }
+    return out;
+  }
+
+  // **굵게** 표시는 강조 칸이 있는 원형에서만 굵게 바뀐다. 그 밖의 자리에서는 별표만 지운다.
+  const stripEm = (s) => String(s == null ? '' : s).replace(/\*\*/g, '');
+  const fill = (xml, map) => xml.replace(/\{\{([A-Z0-9_]+)\}\}/g, (_, k) => esc(stripEm(map[k])));
+
+  function splitEmphasis(value) {
+    const parts = String(value == null ? '' : value).split('**');
+    if (parts.length % 2 === 0) return [{ t: parts.join(''), em: false }]; // 짝이 안 맞으면 강조 없이
+    return parts.map((t, i) => ({ t, em: i % 2 === 1 })).filter((p) => p.t);
+  }
+
+  // 원형 안의 {{KEY}} 글자 칸을 강조 구간마다 보통/굵게 칸으로 쪼갠다.
+  // 굵은 글자모양은 같은 원형 안의 {{EMKEY}} 칸에서 가져오고, 그 칸 자체는 지운다.
+  function richFill(xml, key, emKey, value) {
+    const runRe = (k) => new RegExp('<hp:run charPrIDRef="(\\d+)"><hp:t>([^<]*?)\\{\\{' + k + '\\}\\}([^<]*?)</hp:t></hp:run>');
+    const km = xml.match(runRe(key));
+    if (!km) return xml;
+    const em = emKey ? xml.match(runRe(emKey)) : null;
+    let out = em ? xml.replace(em[0], '') : xml;
+    const segs = splitEmphasis(value);
+    const runs = (segs.length ? segs : [{ t: '', em: false }]).map((sg, i, all) => {
+      const cp = sg.em && em ? em[1] : km[1];
+      const pre = i === 0 ? km[2] : '';
+      const post = i === all.length - 1 ? km[3] : '';
+      return '<hp:run charPrIDRef="' + cp + '"><hp:t>' + pre + esc(sg.t) + post + '</hp:t></hp:run>';
+    });
+    return out.replace(km[0], runs.join(''));
+  }
+
+  // linesegarray 는 한글이 저장해 둔 줄 배치 결과다. 글자를 바꾼 문단에 옛 값이 남으면 한글이 그 값을 믿고
+  // 긴 문장을 한 줄에 겹쳐 그린다. 지워 두면 열 때 다시 배치한다.
+  const normLines = (xml) => xml.replace(/<hp:linesegarray>[\s\S]*?<\/hp:linesegarray>/g, '');
+
+  let idSeq = 1900000000 + Math.floor(Math.random() * 100000000);
+  const renumber = (xml) => xml.replace(/<hp:tbl id="\d+"/g, () => '<hp:tbl id="' + (idSeq++) + '"');
+
+  const clone = (xml, map) => renumber(normLines(fill(xml, map)));
+  const cloneRich = (xml, key, emKey, value, map) =>
+    renumber(normLines(fill(richFill(xml, key, emKey, value), Object.assign({ [key]: value, [emKey]: '' }, map || {}))));
+
+  /* ------------------------------------------------------------------ */
+  /* 서식 원형 읽기                                                       */
+  /* ------------------------------------------------------------------ */
+
+  // 원형 문단은 {{PROTOTYPES}} 표시 문단 아래에 둔다. 각 원형은 안에 든 자리표시자로 찾는다.
+  const PROTO_KEYS = {
+    sectionHeader: 'SEC_TITLE',
+    box: 'BOX_TEXT',
+    plain: 'PLAIN',
+    sub: 'SUB',
+    note: 'NOTE',
+    para: 'PARA',
+    blank: 'BLANK',
+    table: 'TH',
+    // 요약 쪽 (표지 다음 [요약] 1쪽)
+    briefTitle: 'BRIEF_TITLE',
+    briefTitleGap: 'BRIEF_TGAP',
+    briefCompare: 'CMP_TEXT',
+    briefCompareGap: 'BRIEF_BGAP',
+    briefHead: 'BRIEF_HEAD',
+    briefHeadGap: 'BRIEF_HGAP',
+    briefItem: 'BRIEF_TEXT',
+    briefItemGap: 'BRIEF_IGAP',
+    briefNote: 'BRIEF_NOTE',
+    // 첨부 쪽 머리띠 ("첨부 1 | 제목")
+    appendixHeader: 'APX_TITLE',
+  };
+
+  function parseTemplate(files) {
+    const secBytes = files['Contents/section0.xml'];
+    if (!secBytes) throw new Error('서식 파일에 Contents/section0.xml 이 없습니다.');
+    const xml = td.decode(secBytes);
+    const paras = topParagraphs(xml);
+    const mi = paras.findIndex((p) => p.xml.includes('{{PROTOTYPES}}'));
+    if (mi < 0) {
+      throw new Error('서식에 {{PROTOTYPES}} 표시 문단이 없습니다. 이 생성기용으로 준비된 서식이 아닙니다(template-guide.md 참고).');
+    }
+    const zone = paras.slice(mi + 1);
+    const proto = {};
+    for (const [kind, key] of Object.entries(PROTO_KEYS)) {
+      const hit = zone.find((p) => p.xml.includes('{{' + key + '}}'));
+      if (hit) proto[kind] = hit.xml;
+    }
+    const missing = ['sectionHeader', 'box', 'blank'].filter((k) => !proto[k]);
+    if (missing.length) throw new Error('서식에 필수 원형이 없습니다: ' + missing.map((k) => '{{' + PROTO_KEYS[k] + '}}').join(', '));
+    // 머리 부분 중 자리표시자가 든 문단만 줄 배치를 지운다. 나머지는 원본 배치를 그대로 쓴다.
+    const head = paras.slice(0, mi).map((p, i) => {
+      const gap = xml.slice(i === 0 ? 0 : paras[i - 1].end, p.start);
+      return gap + (p.xml.includes('{{') ? normLines(p.xml) : p.xml);
+    }).join('') + xml.slice(mi > 0 ? paras[mi - 1].end : 0, paras[mi].start);
+    const tail = xml.slice(paras[paras.length - 1].end);
+    const placeholders = Array.from(new Set(Array.from(head.matchAll(/\{\{([A-Z0-9_]+)\}\}/g), (m) => m[1])));
+
+    // 요약 쪽을 끼울 자리: 본문 머리띠 표({{HEADER_SUBTITLE}})가 든 글자 칸 바로 앞.
+    // 기본 서식은 표지 로고와 본문 머리띠가 한 문단에 있으므로 그 문단을 둘로 나누고,
+    // 뒤쪽 문단(본문 머리띠)은 새 쪽에서 시작하게 한다.
+    let headBefore = null, headAfter = null;
+    const hs = head.indexOf('{{HEADER_SUBTITLE}}');
+    if (hs >= 0) {
+      const runAt = head.lastIndexOf('<hp:run', head.lastIndexOf('<hp:tbl', hs));
+      const owner = topParagraphs(head).find((p) => p.start <= runAt && runAt < p.end);
+      if (runAt >= 0 && owner) {
+        const open = owner.xml.match(/^<hp:p\b[^>]*>/)[0];
+        const firstRun = owner.start + open.length;
+        if (runAt === firstRun) {
+          headBefore = head.slice(0, owner.start);
+          headAfter = open.replace(/pageBreak="\d"/, 'pageBreak="1"') + head.slice(runAt);
+        } else {
+          headBefore = head.slice(0, runAt) + '</hp:p>';
+          headAfter = open.replace(/pageBreak="\d"/, 'pageBreak="1"') + head.slice(runAt);
+        }
+      }
+    }
+    return { head, headBefore, headAfter, tail, proto, placeholders };
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* 내용(JSON) 정리·검사                                                 */
+  /* ------------------------------------------------------------------ */
+
+  const ROMAN = ['Ⅰ', 'Ⅱ', 'Ⅲ', 'Ⅳ', 'Ⅴ', 'Ⅵ', 'Ⅶ', 'Ⅷ', 'Ⅸ', 'Ⅹ', 'Ⅺ', 'Ⅻ'];
+  const ITEM_TYPES = ['box', 'sub', 'note', 'table', 'text'];
+  const TYPE_ALIAS = { '□': 'box', bullet: 'box', item: 'box', 'ㅇ': 'sub', '*': 'note', paragraph: 'text', para: 'text' };
+
+  function parseItemString(raw) {
+    const s = String(raw).trim();
+    let m;
+    if ((m = s.match(/^\*\s*([\s\S]+)$/))) return { type: 'note', text: m[1] };
+    if ((m = s.match(/^[ㅇ○◦]\s*([\s\S]+)$/))) return { type: 'sub', text: m[1] };
+    const body = s.replace(/^□\s*/, '');
+    if ((m = body.match(/^\(([^()]{1,30})\)\s*([\s\S]+)$/))) return { type: 'box', label: m[1], text: m[2] };
+    return { type: 'box', text: body };
+  }
+
+  function normalizeItems(items) {
+    const out = [];
+    for (const raw of items || []) {
+      if (raw == null) continue;
+      const it = typeof raw === 'string' ? parseItemString(raw) : Object.assign({}, raw);
+      it.type = TYPE_ALIAS[it.type] || it.type || (it.rows ? 'table' : 'box');
+      if (it.type === 'box' && typeof it.text === 'string' && !it.label) {
+        const again = parseItemString(it.text);
+        if (again.type === 'box') { it.label = again.label; it.text = again.text; }
+      }
+      if (it.label) it.label = String(it.label).replace(/^\(|\)$/g, '');
+      const subs = it.subs || it.sub_items;
+      const notes = it.notes;
+      delete it.subs; delete it.sub_items; delete it.notes;
+      out.push(it);
+      for (const s of [].concat(subs || [])) out.push({ type: 'sub', text: s });
+      for (const n of [].concat(notes || [])) out.push({ type: 'note', text: String(n).replace(/^\*\s*/, '') });
+    }
+    return out;
+  }
+
+  const wrapBracket = (s) => {
+    if (!s) return '';
+    const t = String(s).trim();
+    return /^「[\s\S]*」$/.test(t) ? t : '「' + t.replace(/^「|」$/g, '') + '」';
+  };
+
+  function normalizeSpec(spec) {
+    const s = JSON.parse(JSON.stringify(spec || {}));
+    s.sections = (s.sections || []).map((sec) => ({
+      title: typeof sec === 'string' ? sec : (sec.title || ''),
+      items: normalizeItems(typeof sec === 'string' ? [] : (sec.items || sec.content || [])),
+    }));
+    s.attachments = [].concat(s.attachments || []).filter(Boolean).map(String);
+    s.approval = (s.approval || []).map((a) => (typeof a === 'string' ? { position: a, name: '' } : a));
+
+    // 요약 쪽: "brief": { title, subtitle, compare: [...], sections: [{ title, items }] }
+    if (s.brief) {
+      const b = s.brief === true ? {} : s.brief;
+      const baseTitle = String(b.title || s.title || '').trim();
+      s.brief = {
+        title: /\(요약\)\s*$/.test(baseTitle) ? baseTitle : baseTitle + '(요약)',
+        subtitle: b.subtitle != null ? String(b.subtitle) : String(s.subtitle || ''),
+        compare: [].concat(b.compare || []).filter(Boolean).map((c) => {
+          if (typeof c !== 'string') return { label: String(c.label || '').replace(/^\(|\)$/g, ''), text: String(c.text || '') };
+          const p = parseItemString(c);
+          return { label: p.label || '', text: p.text || '' };
+        }),
+        sections: (b.sections || []).map((sec) => ({
+          title: typeof sec === 'string' ? sec : (sec.title || ''),
+          items: normalizeItems(typeof sec === 'string' ? [] : (sec.items || [])),
+        })),
+      };
+    } else {
+      delete s.brief;
+    }
+
+    // 첨부 쪽: "appendices": [{ title, items }] — 본문 뒤 새 쪽마다 "첨부 N | 제목" 머리띠
+    s.appendices = [].concat(s.appendices || []).filter(Boolean).map((a) => ({
+      title: typeof a === 'string' ? a : (a.title || ''),
+      items: normalizeItems(typeof a === 'string' ? [] : (a.items || a.content || [])),
+    }));
+    return s;
+  }
+
+  /* 날짜·요일 검산: "2026. 9. 16.(수)", "’26. 9. 16.(수)", "9. 16.(수)" 형식 */
+  const WEEKDAYS = '일월화수목금토';
+  function checkWeekdays(textValue, defaultYear) {
+    const out = [];
+    const re = /(?:(\d{4})\.\s*|[’'‘](\d{2})\.\s*)?(\d{1,2})\.\s*(\d{1,2})\.?\s*\(([일월화수목금토])\)/g;
+    for (const m of String(textValue).matchAll(re)) {
+      const y = m[1] ? +m[1] : m[2] ? 2000 + +m[2] : defaultYear;
+      const mo = +m[3], d = +m[4];
+      if (!y || mo < 1 || mo > 12 || d < 1 || d > 31) continue;
+      const dt = new Date(Date.UTC(y, mo - 1, d));
+      if (dt.getUTCMonth() !== mo - 1) { out.push('"' + m[0] + '" 는 없는 날짜입니다.'); continue; }
+      const real = WEEKDAYS[dt.getUTCDay()];
+      if (real !== m[5]) out.push('"' + m[0] + '" 의 요일이 맞지 않습니다(' + y + '년 기준 ' + real + '요일).');
+    }
+    return out;
+  }
+
+  function collectTexts(s) {
+    const texts = [];
+    const push = (v) => { if (v != null && v !== '') texts.push(String(v)); };
+    const items = (list) => (list || []).forEach((it) => {
+      push(it.label); push(it.text);
+      if (it.type === 'table') {
+        (it.columns || []).forEach(push);
+        (it.rows || []).forEach((r) => [].concat(r).forEach((c) => [].concat(c).forEach(push)));
+      }
+    });
+    [s.title, s.subtitle, s.summary].forEach(push);
+    (s.sections || []).forEach((sec) => { push(sec.title); items(sec.items); });
+    if (s.brief) {
+      push(s.brief.title); push(s.brief.subtitle);
+      s.brief.compare.forEach((c) => { push(c.label); push(c.text); });
+      s.brief.sections.forEach((sec) => { push(sec.title); items(sec.items); });
+    }
+    (s.appendices || []).forEach((a) => { push(a.title); items(a.items); });
+    return texts;
+  }
+
+  function validateSpec(spec) {
+    const s = normalizeSpec(spec);
+    const errors = [];
+    const warnings = [];
+    if (!s.title || !String(s.title).trim()) errors.push('title(문서 제목)이 비어 있습니다.');
+    if (!s.sections.length) errors.push('sections(본문 장)가 하나도 없습니다.');
+    const groups = s.sections.map((sec, i) => ({ where: (ROMAN[i] || i + 1) + '장', sec }));
+    if (s.brief) {
+      if (!s.brief.sections.length) errors.push('brief(요약 쪽)에 sections 가 없습니다.');
+      s.brief.sections.forEach((sec, i) => groups.push({ where: '요약 ' + (i + 1) + '번째 대분류', sec }));
+      s.brief.compare.forEach((c, i) => { if (!c.text) errors.push('요약 비교 상자 ' + (i + 1) + '번째 줄: text 가 비어 있습니다.'); });
+    }
+    s.appendices.forEach((a, i) => {
+      if (!a.title) errors.push('첨부 ' + (i + 1) + ': title(첨부 제목)이 비어 있습니다.');
+      groups.push({ where: '첨부 ' + (i + 1), sec: a });
+    });
+    groups.forEach(({ where, sec }) => {
+      if (!sec.title) errors.push(where + ': title(제목)이 비어 있습니다.');
+      if (!sec.items.length) warnings.push(where + ' "' + sec.title + '": 항목이 없습니다.');
+      sec.items.forEach((it, j) => {
+        const at = where + ' ' + (j + 1) + '번째 항목';
+        if (!ITEM_TYPES.includes(it.type)) { errors.push(at + ': 알 수 없는 type "' + it.type + '" (box, sub, note, table, text 중 하나)'); return; }
+        if (it.type === 'table') {
+          if (!Array.isArray(it.rows) || !it.rows.length) { errors.push(at + ': 표에 rows 가 없습니다.'); return; }
+          const cols = (it.columns && it.columns.length) || it.rows[0].length;
+          it.rows.forEach((r, k) => {
+            if (!Array.isArray(r)) errors.push(at + ': rows[' + k + '] 가 배열이 아닙니다.');
+            else if (r.length !== cols) warnings.push(at + ': rows[' + k + '] 칸 수(' + r.length + ')가 머리행(' + cols + ')과 다릅니다.');
+          });
+          if (it.widths && it.widths.length !== cols) warnings.push(at + ': widths 개수가 열 수와 다릅니다. 무시합니다.');
+        } else if (!it.text || !String(it.text).trim()) {
+          errors.push(at + ': text 가 비어 있습니다.');
+        }
+      });
+    });
+    if (!s.summary) warnings.push('summary(요약 한 줄)가 없습니다.');
+    if (!s.team) warnings.push('team(작성 부서)이 없습니다.');
+
+    // 결재 전에 사람이 흔히 놓치는 것들
+    const year = +((String(s.year || s.date || '').match(/\d{4}/) || [])[0] || new Date().getFullYear());
+    const texts = collectTexts(s);
+    const dateIssues = new Set();
+    texts.forEach((t) => checkWeekdays(t, year).forEach((w) => dateIssues.add(w)));
+    dateIssues.forEach((w) => warnings.push('날짜 검산: ' + w));
+    const doubleSpace = texts.filter((t) => /\S {2,}\S/.test(t.replace(/^\s+/, '')));
+    if (doubleSpace.length) warnings.push('띄어쓰기 두 칸 이상: "' + doubleSpace[0].slice(0, 40) + '" 외 ' + (doubleSpace.length - 1) + '곳');
+    const blanks = texts.filter((t) => /[○△]{2,}/.test(t)).length;
+    if (blanks) warnings.push('채워야 할 자리(○○·△△)가 ' + blanks + '곳 남아 있습니다.');
+    const oddEm = texts.filter((t) => t.split('**').length % 2 === 0);
+    if (oddEm.length) warnings.push('굵게 표시(**)의 짝이 맞지 않는 곳: "' + oddEm[0].slice(0, 40) + '"');
+    return { errors, warnings, spec: s };
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* 표 만들기                                                           */
+  /* ------------------------------------------------------------------ */
+
+  function cellParts(tc, key) {
+    const para = (tc.match(/<hp:p\b[\s\S]*?<\/hp:p>/g) || []).find((p) => p.includes('{{' + key + '}}'));
+    const open = tc.match(/^[\s\S]*?<hp:subList\b[^>]*>/)[0];
+    const close = tc.slice(tc.lastIndexOf('</hp:subList>'));
+    return { open, para, close };
+  }
+
+  function buildTable(protoXml, it) {
+    const m = protoXml.match(/^([\s\S]*?)(<hp:tbl\b[^>]*>)([\s\S]*?)(<hp:tr>[\s\S]*<\/hp:tr>)([\s\S]*)$/);
+    if (!m) throw new Error('표 원형을 해석할 수 없습니다.');
+    const [, pre, tblOpen, tblHead, rowsXml, post] = m;
+    const tcs = rowsXml.match(/<hp:tc\b[\s\S]*?<\/hp:tc>/g) || [];
+    const find = (k) => tcs.find((t) => t.includes('{{' + k + '}}'));
+    const P = { TH: find('TH'), TD: find('TD') || find('TD_KEY') || find('TH') };
+    P.TD_KEY = find('TD_KEY') || P.TD;
+    P.TD_LIST = find('TD_LIST') || P.TD;
+    const keyOf = (tc) => (tc === find('TD_LIST') ? 'TD_LIST' : tc === find('TD_KEY') ? 'TD_KEY' : tc === find('TD') ? 'TD' : 'TH');
+
+    const header = it.columns && it.columns.length ? it.columns : null;
+    const cols = header ? header.length : it.rows[0].length;
+    const W = +(tblHead.match(/<hp:sz width="(\d+)"/) || [0, 46925])[1];
+    const useKey = it.keyColumn !== false && cols > 1;
+    const lineH = +((P.TH || P.TD).match(/<hp:cellSz width="\d+" height="(\d+)"/) || [0, 1865])[1];
+    const marginX = (() => { const m = (P.TD || P.TH).match(/<hp:cellMargin left="(\d+)" right="(\d+)"/); return m ? +m[1] + +m[2] : 1020; })();
+    const charH = 1200; // 표 글자 크기(12pt) 기준 한 글자 폭 추정치
+
+    // 글자 폭 추정: 한글·전각은 1, 영문·숫자·공백은 0.55 글자
+    const textUnits = (s) => Array.from(String(s)).reduce((a, ch) => a + (ch.charCodeAt(0) < 256 ? 0.55 : 1), 0);
+
+    let weights = Array.isArray(it.widths) && it.widths.length === cols ? it.widths.map(Number) : null;
+    let cw;
+    if (weights) {
+      const total = weights.reduce((a, b) => a + b, 0);
+      cw = weights.map((w) => Math.round((w / total) * W));
+    } else if (cols === 1) {
+      cw = [W];
+    } else {
+      // 첫 열은 가장 긴 구분명이 한 줄에 들어갈 만큼만, 나머지는 고르게
+      const firstTexts = [header ? header[0] : ''].concat(it.rows.map((r) => (Array.isArray(r[0]) ? r[0].join('') : String(r[0] == null ? '' : r[0]))));
+      const need = Math.max.apply(null, firstTexts.map(textUnits)) * charH * 1.08 + marginX + 400;
+      const first = Math.round(Math.min(Math.max(need, W * 0.14), W * (cols === 2 ? 0.34 : 0.26)));
+      cw = [first].concat(Array(cols - 1).fill(Math.round((W - first) / (cols - 1))));
+    }
+    cw[cols - 1] = W - cw.slice(0, -1).reduce((a, b) => a + b, 0);
+
+    // 칸 너비로 줄바꿈 수를 추정해 행 높이를 잡는다(한글은 표 높이를 열 때 늘려주지 않는다).
+    const wrapLines = (line, width, bullet) => {
+      const avail = Math.max(width - marginX - (bullet ? charH * 1.3 : 0), charH * 2);
+      return Math.max(1, Math.ceil((textUnits(line) * charH * 1.05) / avail));
+    };
+    const rows = [];
+    if (header) rows.push(header.map((t) => ({ tc: P.TH, lines: [t] })));
+    for (const r of it.rows) {
+      const row = [];
+      for (let c = 0; c < cols; c++) {
+        const v = r[c] == null ? '' : r[c];
+        if (Array.isArray(v)) row.push({ tc: P.TD_LIST, lines: v.map(String) });
+        else row.push({ tc: c === 0 && useKey ? P.TD_KEY : P.TD, lines: String(v).split('\n') });
+      }
+      rows.push(row);
+    }
+
+    let totalH = 0;
+    const rowXml = rows.map((row, ri) => {
+      const n = Math.max.apply(null, row.map((c, ci) => c.lines.reduce((a, line) => a + wrapLines(line, cw[ci], c.tc === P.TD_LIST && c.tc !== P.TD), 0)));
+      const h = lineH + (n - 1) * 1920 + (n > 1 ? 450 : 0);
+      totalH += h;
+      return '<hp:tr>' + row.map((cell, ci) => {
+        const key = keyOf(cell.tc);
+        const parts = cellParts(cell.tc, key);
+        const paras = cell.lines.map((line) => normLines(fill(parts.para, { [key]: line }))).join('');
+        return (parts.open + paras + parts.close)
+          .replace(/<hp:cellAddr colAddr="\d+" rowAddr="\d+"\/>/, '<hp:cellAddr colAddr="' + ci + '" rowAddr="' + ri + '"/>')
+          .replace(/<hp:cellSpan colSpan="\d+" rowSpan="\d+"\/>/, '<hp:cellSpan colSpan="1" rowSpan="1"/>')
+          .replace(/<hp:cellSz width="\d+" height="\d+"\/>/, '<hp:cellSz width="' + cw[ci] + '" height="' + h + '"/>');
+      }).join('') + '</hp:tr>';
+    }).join('');
+
+    const open = tblOpen
+      .replace(/rowCnt="\d+"/, 'rowCnt="' + rows.length + '"')
+      .replace(/colCnt="\d+"/, 'colCnt="' + cols + '"');
+    const headXml = tblHead.replace(/(<hp:sz width="\d+" widthRelTo="\w+" height=")\d+/, '$1' + totalH);
+    return renumber(normLines(fill(pre, {})) + open + headXml + rowXml + normLines(fill(post, {})));
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* 문서 조립                                                           */
+  /* ------------------------------------------------------------------ */
+
+  function headFields(s) {
+    const now = new Date();
+    const date = s.date || now.getFullYear() + '. ' + (now.getMonth() + 1) + '.';
+    const year = s.year || (String(date).match(/\d{4}/) || [String(now.getFullYear())])[0];
+    const ap = s.approval || [];
+    const sub = s.subtitle || s.coverSubtitle;
+    return Object.assign({
+      TEAM: s.team || '',
+      TITLE: s.title || '',
+      COVER_SUBTITLE: wrapBracket(s.coverSubtitle || sub),
+      HEADER_SUBTITLE: wrapBracket(sub),
+      SUMMARY: s.summary || '',
+      DATE: date,
+      YEAR: year,
+      DISCLOSURE: s.disclosure || '비공개',
+      COOP: s.cooperator || '',
+      POS1: ap[0] ? ap[0].position || '' : '담당',
+      NAME1: ap[0] ? ap[0].name || '' : '',
+      POS2: ap[1] ? ap[1].position || '' : (s.team ? s.team + '장' : ''),
+      NAME2: ap[1] ? ap[1].name || '' : '',
+      POS3: ap[2] ? ap[2].position || '' : '',
+      NAME3: ap[2] ? ap[2].name || '' : '',
+    }, s.fields || {});
+  }
+
+  const PAGE_NUM_HIDE = '<hp:ctrl><hp:pageHiding hideHeader="0" hideFooter="0" hideMasterPage="0" hideBorder="0" hideFill="0" hidePageNum="1"/></hp:ctrl>';
+
+  function buildCompare(proto, lines) {
+    // 표 안쪽 문단 하나만 잡는다(바깥 문단의 여는 태그부터 잡지 않도록 중간에 다른 문단 태그를 허용하지 않음).
+    const lineRe = /<hp:p\b[^>]*>(?:(?!<\/?hp:p\b)[\s\S])*?\{\{CMP_TEXT\}\}(?:(?!<\/?hp:p\b)[\s\S])*?<\/hp:p>/;
+    const lp = proto.match(lineRe);
+    if (!lp) throw new Error('요약 비교 상자 원형을 해석할 수 없습니다.');
+    const body = lines.map((c) => {
+      let x = richFill(lp[0], 'CMP_TEXT', 'CMP_EM', c.text);
+      x = fill(x, { CMP_LABEL: c.label, CMP_TEXT: c.text, CMP_EM: '' });
+      if (!c.label) x = x.replace(/<hp:t>\(\) <\/hp:t>/, '<hp:t></hp:t>');
+      return normLines(x);
+    }).join('');
+    const h = Math.max(1800 * lines.length, 1800);
+    return renumber(normLines(proto.replace(lp[0], body))
+      .replace(/(<hp:sz width="\d+" widthRelTo="\w+" height=")\d+/, '$1' + h)
+      .replace(/(<hp:cellSz width="\d+" height=")\d+/, '$1' + h));
+  }
+
+  function buildBriefXml(b, tpl) {
+    const P = tpl.proto;
+    const missing = ['briefTitle', 'briefHead', 'briefItem'].filter((k) => !P[k]);
+    if (missing.length) {
+      throw new Error('이 서식에는 요약 쪽 원형이 없습니다(' + missing.map((k) => '{{' + PROTO_KEYS[k] + '}}').join(', ') + '). 기본 서식을 쓰거나 brief 를 빼세요.');
+    }
+    const out = [];
+    const gap = (k) => { if (P[k]) out.push(clone(P[k], {})); };
+
+    let title = P.briefTitle;
+    const sub = b.subtitle ? wrapBracket(b.subtitle) : '';
+    if (!sub) title = title.replace('{{BRIEF_SUBTITLE}}<hp:lineBreak/>', '{{BRIEF_SUBTITLE}}');
+    out.push(clone(title, { BRIEF_SUBTITLE: sub, BRIEF_TITLE: b.title }));
+    gap('briefTitleGap');
+    if (b.compare.length && P.briefCompare) {
+      out.push(buildCompare(P.briefCompare, b.compare));
+      gap('briefCompareGap');
+    }
+
+    let hidden = false;
+    b.sections.forEach((sec, si) => {
+      if (si > 0) gap('briefHeadGap');
+      out.push(clone(P.briefHead, { BRIEF_HEAD: sec.title }));
+      gap('briefHeadGap');
+      sec.items.forEach((it, ii) => {
+        const next = sec.items[ii + 1];
+        if (it.type === 'note') {
+          out.push(P.briefNote ? clone(P.briefNote, { BRIEF_NOTE: it.text }) : clone(P.note, { NOTE: it.text }));
+          if (next) gap('briefItemGap');
+          return;
+        }
+        if (it.type === 'table') {
+          if (!P.table) throw new Error('서식에 표 원형({{TH}})이 없어 표를 만들 수 없습니다.');
+          out.push(buildTable(P.table, it));
+          if (next) gap('briefItemGap');
+          return;
+        }
+        let x = cloneRich(P.briefItem, 'BRIEF_TEXT', 'BRIEF_EM', it.text, { BRIEF_LABEL: it.label || '' });
+        if (!it.label) x = x.replace(/<hp:t>\(\) <\/hp:t>/, '<hp:t></hp:t>');
+        if (!hidden) { x = x.replace('</hp:t></hp:run>', '</hp:t>' + PAGE_NUM_HIDE + '</hp:run>'); hidden = true; }
+        out.push(x);
+        if (next && next.type !== 'note') gap('briefItemGap');
+      });
+    });
+    return out.join('');
+  }
+
+  function buildSectionXml(spec, tpl) {
+    const s = normalizeSpec(spec);
+    const P = tpl.proto;
+    const out = [];
+    const blank = () => out.push(clone(P.blank, {}));
+
+    const renderItems = (items) => items.forEach((it, ii) => {
+      if (it.type === 'box') {
+        if (ii > 0) blank();
+        if (it.label) out.push(cloneRich(P.box, 'BOX_TEXT', 'BOX_EM', it.text, { BOX_LABEL: it.label }));
+        else if (P.plain) out.push(cloneRich(P.plain, 'PLAIN', 'PLAIN_EM', it.text));
+        else out.push(cloneRich(P.box, 'BOX_TEXT', 'BOX_EM', it.text, { BOX_LABEL: '' }).replace('<hp:t>()</hp:t>', '<hp:t></hp:t>'));
+      } else if (it.type === 'sub') {
+        if (P.sub) out.push(cloneRich(P.sub, 'SUB', 'SUB_EM', it.text));
+        else out.push(clone(P.para || P.plain, { PARA: '   ㅇ ' + it.text, PLAIN: 'ㅇ ' + it.text }));
+      } else if (it.type === 'note') {
+        out.push(clone(P.note, { NOTE: it.text }));
+      } else if (it.type === 'text') {
+        if (ii > 0) blank();
+        out.push(clone(P.para || P.plain, { PARA: it.text, PLAIN: it.text }));
+      } else if (it.type === 'table') {
+        if (!P.table) throw new Error('서식에 표 원형({{TH}})이 없어 표를 만들 수 없습니다.');
+        out.push(buildTable(P.table, it));
+      }
+    });
+
+    s.sections.forEach((sec, si) => {
+      out.push(clone(P.sectionHeader, { SEC_NUM: ROMAN[si] || String(si + 1), SEC_TITLE: sec.title }));
+      blank();
+      renderItems(sec.items);
+      blank();
+    });
+
+    if (s.attachments.length) {
+      blank();
+      const many = s.attachments.length > 1;
+      s.attachments.forEach((a, i) => {
+        let line = a.trim();
+        if (!/부\.?$/.test(line)) line += '  1부.';
+        if (!line.endsWith('.')) line += '.';
+        const text = (i === 0 ? '붙임  ' : '      ') + (many ? (i + 1) + '. ' : '') + line + (i === s.attachments.length - 1 ? '  끝.' : '');
+        out.push(clone(P.para || P.plain, { PARA: text, PLAIN: text }));
+      });
+    }
+
+    if (s.appendices.length) {
+      if (!P.appendixHeader) throw new Error('이 서식에는 첨부 쪽 원형({{APX_TITLE}})이 없습니다. 기본 서식을 쓰거나 appendices 를 빼세요.');
+      s.appendices.forEach((a, ai) => {
+        const num = s.appendices.length > 1 ? '첨부 ' + (ai + 1) : '첨부';
+        out.push(clone(P.appendixHeader, { APX_NUM: num, APX_TITLE: a.title }));
+        blank();
+        renderItems(a.items);
+        blank();
+      });
+    }
+
+    const hf = headFields(s);
+    let head;
+    if (s.brief) {
+      const brief = buildBriefXml(s.brief, tpl);
+      head = tpl.headBefore != null ? fill(tpl.headBefore, hf) + brief + fill(tpl.headAfter, hf) : fill(tpl.head, hf) + brief;
+    } else {
+      head = fill(tpl.head, hf);
+    }
+    return head + out.join('') + tpl.tail;
+  }
+
+  function previewText(sectionXml) {
+    return Array.from(sectionXml.matchAll(/<hp:t>([\s\S]*?)<\/hp:t>/g), (m) => unesc(m[1])).join('\r\n').slice(0, 4000);
+  }
+
+  function pad(n) { return String(n).padStart(2, '0'); }
+
+  function suggestFileName(spec, when) {
+    const d = when || new Date();
+    const stamp = pad(d.getFullYear() % 100) + pad(d.getMonth() + 1) + pad(d.getDate()) + pad(d.getHours()) + pad(d.getMinutes());
+    const clean = (x) => String(x || '').replace(/[\\/:*?"<>|]/g, '').trim();
+    const team = clean(spec.team);
+    return (team ? '(' + team + ')' : '') + (clean(spec.title) || '공문') + '_' + stamp + '.hwpx';
+  }
+
+  async function loadTemplate(templateBytes, codec) {
+    const { files, order } = await unzip(templateBytes, codec);
+    const tpl = parseTemplate(files);
+    return { files, order, tpl };
+  }
+
+  async function buildHwpx(spec, template, opts) {
+    opts = opts || {};
+    const codec = opts.codec || defaultCodec();
+    const loaded = template instanceof Uint8Array ? await loadTemplate(template, codec) : template;
+    const { errors, spec: s } = validateSpec(spec);
+    if (errors.length) throw new Error('내용(JSON)에 오류가 있습니다.\n- ' + errors.join('\n- '));
+
+    const sectionXml = buildSectionXml(s, loaded.tpl);
+    const files = Object.assign({}, loaded.files);
+    files['Contents/section0.xml'] = te.encode(sectionXml);
+    files['Preview/PrvText.txt'] = te.encode(previewText(sectionXml));
+    delete files['Preview/PrvImage.png'];
+    if (files['Contents/content.hpf']) {
+      const hpf = td.decode(files['Contents/content.hpf'])
+        .replace(/<opf:title>[\s\S]*?<\/opf:title>|<opf:title\/>/, '<opf:title>' + esc(s.title) + '</opf:title>');
+      files['Contents/content.hpf'] = te.encode(hpf);
+    }
+    if (!files.mimetype) files.mimetype = te.encode('application/hwp+zip');
+
+    const names = ['mimetype'].concat(loaded.order.filter((n) => n !== 'mimetype' && files[n]));
+    for (const n of Object.keys(files)) if (!names.includes(n)) names.push(n);
+    return zip(names.map((name) => ({ name, data: files[name] })), codec);
+  }
+
+  return {
+    buildHwpx,
+    loadTemplate,
+    validateSpec,
+    normalizeSpec,
+    buildSectionXml,
+    parseTemplate,
+    suggestFileName,
+    topParagraphs,
+    unzip,
+    zip,
+    crc32,
+    defaultCodec,
+    ROMAN,
+  };
+});
+</script>
+<script>/*
+ * 공문 유형별 장(章) 구성
+ *
+ * 근거
+ *  - 국가공무원인재개발원 「정책기획 실습」(2018) 3장 "보고서를 잘 작성하는 방법"
+ *    · 대표 보고서 유형 5종: 정책, 검토, 상황·동향, 행사·회의 계획, 결과 보고서
+ *    · 보고서 기본구조: 검토배경(목적) → 현황 및 문제점 → 개선방안(대책, 추진계획) → 추진일정(향후계획)
+ *      예상문제점 및 대책, 홍보계획, 소요예산, 행정사항은 필요시 추가
+ *    · 구성 사례: A 대책·대안 제시형, B 계속 추진사업형, C 진단·분석형
+ *    · 도입부 "비전 및 전략" 표(비전·목표 → 추진전략 → 중점 추진과제)
+ *  - 관계부처 「혁신성장동력 시행계획」: 추진배경 및 경과 → 목표 → 보완사항 → 시행계획 → 재정소요 → 향후계획
+ *
+ * Node 에서 명령으로 쓸 수 있다.
+ *   node doctypes.js                          유형 목록
+ *   node doctypes.js result                   결과 보고의 장 구성
+ *   node doctypes.js result --skeleton 틀.json  빈 틀 내용 JSON 저장(build.js 로 바로 hwpx 가능)
+ */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory();
+  else root.GongmunDocTypes = factory();
+})(typeof self !== 'undefined' ? self : this, function () {
+  'use strict';
+
+  const GROUPS = [
+    { id: 'plan', name: '계획', desc: '일을 시작하기 전에 결재받는 문서' },
+    { id: 'report', name: '결과·상황', desc: '진행 중이거나 끝난 일을 알리는 문서' },
+    { id: 'review', name: '검토·개선', desc: '판단이나 대책이 필요한 문서' },
+    { id: 'request', name: '협조', desc: '다른 부서의 도움을 구하는 문서' },
+  ];
+
+  const SCHEDULE_TABLE = { columns: ['일정', '추진 내용', '담당'], rows: [['○월 ○주', '○○○', '○○팀'], ['○월 ○주', '○○○', '○○팀']] };
+  const ROLE_TABLE = { columns: ['구분', '○○팀', '○○팀'], rows: [['역할', ['○○○', '○○○'], ['○○○', '○○○']]] };
+
+  const TYPES = [
+    /* ---------------- 계획 ---------------- */
+    {
+      id: 'plan',
+      group: 'plan',
+      name: '추진 계획(안)',
+      when: '새 사업·제도·과제를 시작하기 전에 방향과 방법을 결재받을 때',
+      basis: '인재개발원 보고서 기본구조',
+      titleHint: '○○ 추진 계획(안)',
+      subtitleHint: '○○을 위한',
+      summaryHint: '○○을 위해 ○○을 추진하고자 함',
+      sections: [
+        { title: '추진배경', guide: '왜 지금 해야 하는지. 추진 근거(법령·지시·계획), 필요성, 목적', labels: ['추진근거', '필요성'] },
+        { title: '현황 및 문제점', guide: '지금 상태와 해결할 문제를 수치·사례로 제시', labels: ['현황', '문제점'] },
+        { title: '추진 계획', guide: '기본방향, 세부 추진내용, 추진체계(역할 분담)', labels: ['기본방향', '세부내용', '추진체계'], table: ROLE_TABLE },
+        { title: '소요 예산', guide: '재원과 산출근거. 예산이 없으면 "별도 예산 없음"으로 적음', labels: ['소요예산'], optional: true },
+        { title: '기대효과', guide: '정량 효과를 먼저, 정성 효과를 다음에', labels: ['○○ 효과', '○○ 효과'] },
+        { title: '향후 일정 및 행정사항', guide: '단계별 일정과 관계 부서 협조사항', labels: ['협조요청'], table: SCHEDULE_TABLE, tableFirst: true },
+      ],
+      extras: ['예상 문제점 및 대책', '홍보 계획'],
+    },
+    {
+      id: 'system',
+      group: 'plan',
+      name: '시스템 구축 계획(안)',
+      when: '정보시스템·웹서비스·자동화 도구를 자체 개발하거나 도입할 때',
+      basis: '추진 계획(안)의 정보화 사업 변형',
+      titleHint: '○○ 시스템 구축 계획(안)',
+      subtitleHint: '○○ 업무 효율화를 위한',
+      summaryHint: '○○을 ○○하는 「○○ 시스템」을 구축하고자 함',
+      sections: [
+        { title: '추진배경', guide: '현업의 불편, 현행 방식의 한계, 구축 필요성', labels: ['현업 수요', '현행 한계'] },
+        { title: '구축 개요', guide: '시스템명, 대상·범위, 추진체계, 개발 방법', labels: ['시스템명', '적용범위', '추진체계'], table: ROLE_TABLE },
+        { title: '주요 기능', guide: '사용자가 할 수 있는 일을 기능 단위로', labels: ['○○ 기능', '○○ 기능'] },
+        { title: '보안 및 개인정보 보호', guide: '접근통제, 인증, 권한 분리, 자료 보관', labels: ['접근통제', '권한분리'] },
+        { title: '기대효과', guide: '업무시간 절감, 예산 절감, 관리 투명성', labels: ['업무 효율', '예산 절감'] },
+        { title: '향후 일정 및 행정사항', guide: '시범운영, 보완, 정식운영 일정', labels: ['협조요청'], table: SCHEDULE_TABLE, tableFirst: true },
+      ],
+      extras: ['소요 예산', '운영 매뉴얼·교육 계획'],
+    },
+    {
+      id: 'master',
+      group: 'plan',
+      name: '종합계획·중장기 전략',
+      when: '여러 해에 걸친 정책·사업의 비전, 전략, 중점과제를 한꺼번에 제시할 때',
+      basis: '혁신성장동력 시행계획, 인재개발원 "비전 및 전략" 도입부',
+      titleHint: '○○ 종합계획(2026~2028)',
+      subtitleHint: '○○ 경쟁력 강화를 위한',
+      summaryHint: '○○을 목표로 ○대 전략 ○○개 과제를 추진하고자 함',
+      sections: [
+        { title: '추진배경 및 경과', guide: '정책 환경 변화와 그간의 추진 경과', labels: ['추진배경', '추진경과'] },
+        { title: '여건 분석', guide: '그간의 성과와 한계, 대내외 환경 변화', labels: ['성과', '한계', '환경변화'] },
+        { title: '비전 및 추진전략', guide: '비전·목표 → 추진전략 → 중점과제. 전략 수와 과제 묶음 수를 맞춤', labels: ['비전', '목표'], table: { columns: ['추진전략', '중점 추진과제'], rows: [['① ○○○', ['○○○', '○○○']], ['② ○○○', ['○○○', '○○○']]] } },
+        { title: '중점 추진과제', guide: '전략별로 과제를 풀어 씀. 과제마다 현황→추진내용', labels: ['과제 1', '과제 2'] },
+        { title: '재정 소요', guide: '연도별 소요 예산과 재원', labels: ['총 소요'], optional: true },
+        { title: '추진체계 및 향후계획', guide: '추진 조직, 점검 방식, 연차별 일정', labels: ['추진체계', '성과관리'], table: SCHEDULE_TABLE },
+      ],
+      extras: ['과제별 세부 시행계획(붙임)'],
+    },
+    {
+      id: 'annual',
+      group: 'plan',
+      name: '연간 사업계획',
+      when: '매년 계속하는 사업의 올해 계획을 전년 실적과 함께 보고할 때',
+      basis: '인재개발원 구성사례 B(계속 추진사업형)',
+      titleHint: '2026년 ○○ 사업계획',
+      subtitleHint: '○○ 사업의 내실화를 위한',
+      summaryHint: '전년도 성과를 바탕으로 2026년 ○○ 사업을 ○○ 중심으로 추진하고자 함',
+      sections: [
+        { title: '일반 현황', guide: '사업 목적, 대상, 규모, 근거', labels: ['사업개요', '추진근거'] },
+        { title: '전년도 성과와 반성', guide: '계획 대비 실적, 잘된 점과 부족한 점', labels: ['주요 성과', '미흡 사항'], table: { columns: ['구분', '목표', '실적', '달성률'], rows: [['○○', '○○건', '○○건', '○○%']] } },
+        { title: '올해 사업계획', guide: '추진 방향과 세부 사업, 전년 대비 달라지는 점', labels: ['추진방향', '세부사업'] },
+        { title: '추진 일정', guide: '분기·월별 일정', labels: [], table: SCHEDULE_TABLE },
+        { title: '기대효과', guide: '올해 목표 달성 시 효과', labels: ['○○ 효과'] },
+      ],
+      extras: ['소요 예산', '성과 지표'],
+    },
+    {
+      id: 'event-plan',
+      group: 'plan',
+      name: '행사·회의 개최 계획',
+      when: '행사·회의·교육·설명회를 열기 전에 계획과 업무분장을 공유할 때',
+      basis: '인재개발원 행사·회의 계획보고서',
+      titleHint: '○○ 설명회 개최 계획',
+      subtitleHint: '○○ 현장 의견 수렴을 위한',
+      summaryHint: '○○을 위해 ○월 ○일 ○○ 설명회를 개최하고자 함',
+      sections: [
+        { title: '개최 목적', guide: '행사를 여는 이유와 기대하는 결과', labels: ['목적'] },
+        { title: '행사 개요', guide: '일시, 장소, 참석 대상, 주요 내용', labels: [], table: { columns: ['구분', '내용'], rows: [['일시', '2026. ○. ○.(○) 00:00~00:00'], ['장소', '○○ 회의실'], ['참석', '○○ 등 ○○명'], ['주요내용', '○○ 발표, 질의응답']] } },
+        { title: '세부 진행계획', guide: '시간대별 순서와 진행자', labels: [], table: { columns: ['시간', '내용', '비고'], rows: [['00:00~00:10', '개회 및 인사말', '○○장'], ['00:10~00:40', '○○ 발표', '○○팀']] } },
+        { title: '준비사항 및 업무분장', guide: '누가 무엇을 언제까지 준비하는지', labels: [], table: { columns: ['구분', '내용', '담당'], rows: [['장소·장비', '○○○', '○○팀'], ['자료', '○○○', '○○팀']] } },
+        { title: '소요 예산', guide: '항목별 금액과 집행 과목', labels: ['소요예산'], optional: true },
+        { title: '행정사항', guide: '참석 협조, 복장, 주차, 문의처', labels: ['협조요청', '문의'] },
+      ],
+      extras: ['홍보 계획', '안전 대책'],
+    },
+
+    /* ---------------- 결과·상황 ---------------- */
+    {
+      id: 'result',
+      group: 'report',
+      name: '결과 보고',
+      when: '사업·점검·교육 등이 끝난 뒤 결과와 성과를 보고할 때',
+      basis: '인재개발원 결과보고서(계획 대비 성과, 문제점, 개선방안, 향후 고려사항)',
+      titleHint: '○○ 추진 결과 보고',
+      subtitleHint: '',
+      summaryHint: '○○을 추진한 결과 ○○ 성과를 거두었으며, 향후 ○○을 보완하고자 함',
+      sections: [
+        { title: '추진 개요', guide: '목적, 기간, 대상, 방법. 최초 계획 보고와 연결', labels: ['목적', '기간·대상'] },
+        { title: '추진 결과', guide: '계획 대비 실적을 수치로. 대상별로 내용이 달랐으면 구분|대상A|대상B 비교표로 이원화. 만족도는 매우만족100·만족80·보통60·불만족40·매우불만족20점으로 응답 건수를 합쳐 환산하고, 평가 지표 문항과 참고 문항 표를 나눔', labels: ['추진실적'], table: { columns: ['구분', '계획', '실적', '비고'], rows: [['○○', '○○건', '○○건', '']] } },
+        { title: '주요 성과', guide: '정량 성과와 정성 성과. 사진·통계는 붙임으로', labels: ['정량 성과', '정성 성과'] },
+        { title: '문제점 및 개선사항', guide: '추진 중 드러난 문제와 원인, 개선 방향', labels: ['문제점', '개선방향'] },
+        { title: '향후 계획', guide: '후속 조치와 다음 추진 시 고려사항', labels: ['후속조치'] },
+      ],
+      extras: ['첨부: 참여자 의견 요약(익명, 한 쪽)', '첨부: 세부 일정표(회차·일자(요일)·대상·인원)', '첨부: 설문 결과표'],
+    },
+    {
+      id: 'event-result',
+      group: 'report',
+      name: '행사·회의 결과 보고',
+      when: '행사·회의가 끝난 뒤 논의 내용과 결정사항, 후속조치를 알릴 때',
+      basis: '인재개발원 행사·회의보고서(종료 후 결과보고로 연계)',
+      titleHint: '○○ 회의 결과 보고',
+      subtitleHint: '',
+      summaryHint: '○○ 회의를 개최하여 ○○을 결정하였으며, 후속조치를 추진하고자 함',
+      sections: [
+        { title: '개최 개요', guide: '일시, 장소, 참석자, 안건', labels: [], table: { columns: ['구분', '내용'], rows: [['일시', '2026. ○. ○.(○) 00:00~00:00'], ['장소', '○○'], ['참석', '○○ 등 ○○명'], ['안건', '○○○']] } },
+        { title: '주요 논의 내용', guide: '안건별 발언 요지와 쟁점', labels: ['안건 1', '안건 2'] },
+        { title: '결정사항 및 후속조치', guide: '결정된 것과 누가 언제까지 할지', labels: [], table: { columns: ['결정사항', '조치내용', '담당', '기한'], rows: [['○○○', '○○○', '○○팀', '○. ○.']] } },
+        { title: '성과 및 시사점', guide: '행사로 얻은 것과 다음에 반영할 점', labels: ['성과', '시사점'] },
+      ],
+      extras: ['붙임: 회의자료, 참석자 명단, 사진'],
+    },
+    {
+      id: 'status',
+      group: 'report',
+      name: '상황·동향 보고',
+      when: '사건·사고·민원·언론 보도 등 진행 중인 상황을 신속히 알릴 때',
+      basis: '인재개발원 상황·동향보고서(보고배경 → 상황 및 문제점)',
+      titleHint: '○○ 관련 상황 보고',
+      subtitleHint: '',
+      summaryHint: '○○이 발생하여 현재까지의 상황과 대응 계획을 보고함',
+      sections: [
+        { title: '보고 배경', guide: '무슨 일인지 한두 문장. 목적·취지·필요성', labels: ['개요'] },
+        { title: '상황 및 경과', guide: '발생부터 현재까지 시간 순서. 일시를 명시', labels: ['발생', '경과'] },
+        { title: '쟁점 및 전망', guide: '문제가 되는 점, 예상되는 파장과 전망', labels: ['쟁점', '전망'] },
+        { title: '대응 조치 및 계획', guide: '지금까지 한 조치와 앞으로 할 조치', labels: ['조치사항', '향후계획'] },
+      ],
+      extras: ['언론 대응', '관계기관 협조'],
+    },
+
+    /* ---------------- 검토·개선 ---------------- */
+    {
+      id: 'review',
+      group: 'review',
+      name: '검토 보고',
+      when: '제도·요청·사안에 대해 사실과 주장을 비교해 의사결정을 받을 때',
+      basis: '인재개발원 검토보고서',
+      titleHint: '○○ 검토 보고',
+      subtitleHint: '',
+      summaryHint: '○○에 대해 검토한 결과 ○안이 적정하여 ○○을 건의함',
+      sections: [
+        { title: '검토 배경', guide: '누가 무엇을 요청했는지, 검토 목적', labels: ['요청내용', '검토목적'] },
+        { title: '주요 내용', guide: '사안의 사실관계와 쟁점', labels: ['사실관계', '쟁점'] },
+        { title: '검토 의견', guide: '대안별 장단점을 비교하고 판단 근거 제시', labels: ['검토결과'], table: { columns: ['구분', '1안(○○)', '2안(○○)'], rows: [['내용', '○○○', '○○○'], ['장점', '○○○', '○○○'], ['단점', '○○○', '○○○']] } },
+        { title: '결론 및 건의', guide: '채택안과 결정 후 조치 계획', labels: ['결론', '조치계획'] },
+      ],
+      extras: ['관련 법령·규정(붙임)'],
+    },
+    {
+      id: 'improve',
+      group: 'review',
+      name: '개선 방안',
+      when: '드러난 문제에 대한 대책·대안을 제시할 때',
+      basis: '인재개발원 구성사례 A(대책·대안 제시형)',
+      titleHint: '○○ 개선 방안',
+      subtitleHint: '○○ 실효성 제고를 위한',
+      summaryHint: '○○의 문제점을 개선하기 위해 ○○ 방안을 추진하고자 함',
+      sections: [
+        { title: '현황과 실태', guide: '제도·업무의 현재 운영 상태를 수치로', labels: ['운영현황', '실태'] },
+        { title: '문제점', guide: '문제와 원인. 쟁점이 있으면 함께', labels: ['문제점', '원인'] },
+        { title: '개선 방안', guide: '문제점과 1:1로 대응하는 대책', labels: ['개선 1', '개선 2'], table: { columns: ['문제점', '개선 방안'], rows: [['○○○', '○○○'], ['○○○', '○○○']] } },
+        { title: '기대효과', guide: '개선 후 달라지는 점', labels: ['○○ 효과'] },
+        { title: '향후 계획', guide: '시행 일정, 규정 개정 등 후속 절차', labels: [], table: SCHEDULE_TABLE },
+      ],
+      extras: ['예상 문제점 및 대책'],
+    },
+    {
+      id: 'diagnosis',
+      group: 'review',
+      name: '진단·분석 보고',
+      when: '실태조사·점검·데이터 분석 결과와 시사점을 보고할 때',
+      basis: '인재개발원 구성사례 C(진단·분석형)',
+      titleHint: '○○ 실태 진단 결과',
+      subtitleHint: '',
+      summaryHint: '○○을 진단한 결과 ○○이 확인되어 ○○을 개선하고자 함',
+      sections: [
+        { title: '진단 개요', guide: '목적, 대상, 기간, 방법(조사·분석 방식)', labels: ['목적', '대상·방법'] },
+        { title: '진단 결과', guide: '분석 결과를 항목별로. 표·수치 중심', labels: ['○○ 분석', '○○ 분석'], table: { columns: ['항목', '결과', '비고'], rows: [['○○', '○○%', '']] } },
+        { title: '시사점', guide: '결과가 뜻하는 것, 우선 해결할 점', labels: ['시사점'] },
+        { title: '개선 방안', guide: '진단 결과에 근거한 대책', labels: ['개선방안'] },
+        { title: '향후 계획', guide: '후속 조치와 재점검 일정', labels: ['후속조치'] },
+      ],
+      extras: ['붙임: 조사표, 세부 분석자료'],
+    },
+
+    /* ---------------- 협조 ---------------- */
+    {
+      id: 'request',
+      group: 'request',
+      name: '협조 요청',
+      when: '다른 부서·기관에 자료 제출, 업무 협조, 의견을 요청할 때',
+      basis: '행정업무 협조 문서 관행',
+      titleHint: '○○ 관련 협조 요청',
+      subtitleHint: '',
+      summaryHint: '○○을 위해 ○○ 협조를 요청함',
+      sections: [
+        { title: '요청 배경', guide: '왜 협조가 필요한지, 관련 근거', labels: ['추진배경', '관련근거'] },
+        { title: '요청 사항', guide: '구체적으로 무엇을 해 달라는지', labels: ['요청내용'], table: { columns: ['구분', '요청 내용', '비고'], rows: [['○○', '○○○', '']] } },
+        { title: '협조 기한 및 방법', guide: '언제까지, 어떤 방식(양식·메일·시스템)으로', labels: ['기한', '제출방법'] },
+        { title: '행정사항', guide: '담당자, 연락처, 문의처', labels: ['문의'] },
+      ],
+      extras: ['붙임: 제출 양식'],
+    },
+  ];
+
+  const ROMAN = ['Ⅰ', 'Ⅱ', 'Ⅲ', 'Ⅳ', 'Ⅴ', 'Ⅵ', 'Ⅶ', 'Ⅷ', 'Ⅸ', 'Ⅹ'];
+  const byId = (id) => TYPES.find((t) => t.id === id);
+
+  // 빈 틀: 그대로 build.js 에 넣으면 장 구성과 작성 요령이 담긴 hwpx 가 나온다.
+  function skeleton(id, opts) {
+    opts = opts || {};
+    const t = byId(id);
+    if (!t) throw new Error('알 수 없는 문서 유형: ' + id);
+    const sections = t.sections.filter((s) => opts.includeOptional || !s.optional).map((s) => {
+      const items = [];
+      const boxes = (s.labels.length ? s.labels : []).map((label) => ({ type: 'box', label, text: '○○○' }));
+      const table = s.table ? Object.assign({ type: 'table' }, JSON.parse(JSON.stringify(s.table))) : null;
+      if (table && s.tableFirst) items.push(table);
+      boxes.forEach((b, i) => {
+        items.push(b);
+        if (i === 0) items.push({ type: 'note', text: '(작성 요령) ' + s.guide });
+      });
+      if (!boxes.length) items.push({ type: 'note', text: '(작성 요령) ' + s.guide });
+      if (table && !s.tableFirst) items.push(table);
+      return { title: s.title, items };
+    });
+    return {
+      docType: t.id,
+      team: opts.team || '',
+      title: opts.title || t.titleHint,
+      subtitle: t.subtitleHint || undefined,
+      summary: t.summaryHint,
+      sections,
+    };
+  }
+
+  // AI 요청문에 붙일 유형 설명
+  function promptFor(id) {
+    const t = byId(id);
+    if (!t) return '';
+    const lines = [];
+    lines.push('## 문서 유형: ' + t.name);
+    lines.push('- 쓰임: ' + t.when);
+    lines.push('- 제목 예: ' + t.titleHint + (t.subtitleHint ? ' / 부제 예: ' + t.subtitleHint : ' / 부제는 필요할 때만'));
+    lines.push('- summary 예: ' + t.summaryHint);
+    lines.push('- 장 구성(이 순서와 장 제목을 따른다. "선택" 장은 자료가 있을 때만 넣는다):');
+    t.sections.forEach((s, i) => {
+      const hint = [s.guide];
+      if (s.labels.length) hint.push('□ 라벨 예: ' + s.labels.join(', '));
+      if (s.table) hint.push('표 권장: ' + s.table.columns.join(' | '));
+      lines.push('  ' + (ROMAN[i] || i + 1) + '. ' + s.title + (s.optional ? ' (선택)' : '') + ' — ' + hint.join(' / '));
+    });
+    if (t.extras && t.extras.length) lines.push('- 필요하면 추가: ' + t.extras.join(', '));
+    lines.push('- 본문이 3쪽을 넘거나 요약을 원하면 brief(요약 쪽)를 넣고, 긴 표·의견·일정·상세 로직은 appendices(첨부 쪽)로 보낸다.');
+    return lines.join('\n');
+  }
+
+  return { GROUPS, TYPES, byId, skeleton, promptFor };
+});
+
+</script>
+<script>
+const DEFAULT_TEMPLATE_B64 = "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";
+const EXAMPLE = {"team":"AI전환팀","title":"착한주유소 가격 현황판 구축 계획(안)","coverSubtitle":"착한주유소 가격기준 이행실태 상시점검을 위한","subtitle":"데이터 기반 착한주유소 가격관리를 위한","summary":"전국 착한주유소 472개소의 판매가격을 매일 자동 수집하여 시·도별 가격순위와 기준 이행 여부를 신호등으로 보여주는 「가격 현황판」을 자체 구축·운영하고자 함","date":"2026. 9.","approval":[{"position":"담당","name":""},{"position":"AI전환팀장","name":""},{"position":"사업이사","name":""}],"disclosure":"비공개","brief":{"subtitle":"데이터 기반 착한주유소 가격관리를 위한","compare":["(기존) 주유소별 가격을 오피넷에서 조회한 뒤 엑셀로 순위를 계산하는 작업을 **매일 반복**","(개선) 자동 수집된 가격으로 **판정 결과와 근거를 현황판에서 바로 확인**"],"sections":[{"title":"추진 배경 및 목적","items":["(배경) 착한주유소 472개소의 가격기준 이행 여부를 수작업으로 점검하여 **상시 확인이 곤란***","* ①(단순 반복) 시·도별 순위 산정을 매번 별도 가공 ②(증빙 부족) 일자별 가격 이력 확보 곤란","(목적) 가격 수집부터 판정까지 자동화한 현황판을 구축하여 **가격관리 효율화 및 판정 객관성 확보**"]},{"title":"구축 계획","items":["(수행/역할) AI전환팀 자체 개발 / 사업관리팀 판정기준 관리 및 결과 활용","(운영방식) 오피넷 판매가격을 매일 2회 자동 수집하여 **시·도별 가격순위로 판정**","(판정방식) 시·도 내 상위권(서울·경기 10위, 그 외 5위) 이내이면 적합, 격차에 따라 **적합·근접·초과**로 구분"]},{"title":"향후 계획","items":["(시범운영) 9월 시범 운영 후 사업관리팀 판정기준 검증 및 **기능 보완**","(정식전환) 10월 중 정식 운영 전환 및 전사 이용 안내"]}]},"sections":[{"title":"추진배경","items":["(점검수단 부재) 착한주유소는 지역 시세보다 저렴한 가격 유지를 조건으로 지정·운영되고 있으나, **가격기준 이행 여부를 상시 확인할 수단이 없어** 사업관리팀의 점검이 수작업에 의존","(자료가공 부담) 오피넷「사업자별 과거 판매가격」은 전국 1만여 개 주유소를 대상으로 제공되어, 착한주유소 472개소만 추려 시·도별 순위를 산정하려면 매번 별도 가공이 필요","(이력관리 곤란) 조회 시점의 가격만 확인할 수 있어 일자별 가격 추이와 미신고 이력 등 지정 취소·재지정 심사에 필요한 증빙자료 확보가 곤란","(내부역량 활용) 현업의 수요를 AI전환팀이 AI 코딩 보조 도구로 자체 개발하여 **외부 용역 없이 신속 구축** 가능"]},{"title":"구축 계획(안)","items":[{"type":"box","label":"시스템명","text":"착한주유소 가격 현황판(Good Station Board)"},{"type":"box","label":"추진체계","text":"외부 용역 없이 AI 코딩 보조 도구를 활용하여 AI전환팀 자체 기술력으로 구축(예산 절감)"},{"type":"table","columns":["구분","AI전환팀(구축)","사업관리팀(운영)"],"rows":[["내용",["시스템 설계·개발 및 배포","수집·집계 자동화 운영","오류 조치, 기능 개선 등 기술지원"],["가격기준 점검 총괄","착한주유소 명단 및 판정기준 관리","점검 결과 활용 및 사후조치"]]],"widths":[1,2.4,2.4]},{"type":"box","label":"자료수집","text":"오피넷「사업자별 과거 판매가격」을 매일 2회(10:20, 19:30) 자동 수집하여 판정 결과를 갱신","subs":["수집·판정·배포 전 과정을 자동화하여 별도 수작업 없이 갱신"],"notes":["수집 원본은 압축 보관(3.5MB → 317KB, 연 113MB)하여 판정식 변경 시 재산정 가능"]}]},{"title":"판정 기준","items":["(비교단위) 시·군·구가 아닌 시·도를 비교 모집단으로 하여 관내 표본이 적은 지역의 순위 왜곡을 방지",{"type":"box","label":"판정등급","text":"소속 시·도 내 가격순위에 따라 5단계로 구분하여 신호등으로 표시"},{"type":"table","columns":["판정 등급","판정 기준"],"rows":[["가격기준 적합(녹색)","소속 시·도에서 상위 N위 이내"],["가격기준 근접(황색)","N위 밖이나 2N위 이내"],["가격기준 초과(적색)","2N위 밖"],["과거 미신고(흑색)","하루라도 가격을 신고하지 않은 이력이 있는 경우"],["가격정보 없음(백색)","당일 가격자료가 없어 판정이 불가한 경우"]]},"* N은 서울·경기 10위, 그 밖의 시·도 5위(관리자 화면에서 조정 가능)"]},{"title":"향후 일정 및 행정사항","items":[{"type":"table","columns":["일정","추진 내용"],"rows":[["9월 2주","시범 운영 및 사업관리팀 판정기준 검증"],["9월 4주","검증 의견 반영 및 기능 보완"],["10월 중","정식 운영 전환 및 전사 이용 안내"]],"keyColumn":true},"(협조요청) 사업관리팀은 착한주유소 명단 및 판정기준 변경 시 관리자 화면을 통해 갱신"]}],"attachments":["착한주유소 가격 현황판 화면 구성(안)"],"appendices":[{"title":"판정 로직 상세(참고)","items":["(산출 절차) 판정은 **4단계 계산**으로 이루어지며, 중간값을 보관하여 사후 재현 가능",{"type":"table","columns":["순서","계산","내용"],"rows":[["1","합계가격 산출","주유소별 휘발유 가격 + 경유 가격"],["2","순위 부여","시·도 전체 주유소를 합계가격 오름차순 정렬 후 조밀 순위 부여"],["3","기준선 확정","적합 순위에 해당하는 합계가격 추출"],["4","판정","주유소 순위가 적합 순위 이내이면 적합"]],"widths":[0.7,1.4,3.4]},"(조밀 순위) 동일 합계가격은 동일 순위로 묶고 다음 순위를 연속 부여하여 **같은 가격인데 판정이 갈리는 경우를 방지**","ㅇ 예 : 3개소가 공동 8위이면 다음 순위는 11위가 아닌 9위"]}]};
+const PROMPT_GUIDE = "너는 공공기관·회사의 결재 문서를 쓰는 기획 담당자다. 아래 \"작성할 문서와 참고 자료\"를 바탕으로 한글 공문(계획안·보고서)의 내용을 작성해라. 결과는 설명 없이 JSON 코드 블록 하나로만 답해라. 이 JSON은 hwpx 생성기에 그대로 들어간다.\r\n\r\n## 문장 규칙\r\n- 개조식으로 쓰고 명사형으로 끝낸다: \"~함\", \"~임\", \"~필요\", \"~예정\", \"~확보\", \"~곤란\". \"~합니다\"는 쓰지 않는다.\r\n- □ 항목은 \"(라벨) 본문\" 구조다. 라벨은 2~7자 명사구(예: 현황, 문제점, 추진체계, 소요예산, 기대효과), 본문은 90자 안팎 1~2줄.\r\n- 한 □에 내용이 많으면 \"ㅇ\" 하위 항목으로 나누고, 출처·기준일·보충 설명은 \"*\" 각주로 내린다.\r\n- 각 □·ㅇ에서 결재권자가 꼭 봐야 할 결론 구절 하나만 **굵게** 감싼다. 한 항목에 한 곳, 문장 전체를 감싸지 않는다.\r\n- 제목은 \"~ 계획(안)\", \"~ 결과 보고\", \"~ 개선 방안\", \"~ 협조 요청\" 중 알맞게 끝낸다. 부제는 목적을 담아 \"~을 위한\"으로 끝낸다.\r\n- summary는 \"무엇을 왜 하고자 함\" 한 문장이다.\r\n- 아래에 \"문서 유형\"과 장 구성이 주어지면 그 순서와 장 제목을 그대로 따른다. 주어지지 않았으면 내용에 맞게 4~7개 장으로 구성한다.\r\n- 각 장의 \"작성 요령\"은 무엇을 쓸지 알려주는 안내다. 문서에 그 문구를 옮겨 적지 않는다.\r\n- 역할 분담·비교·일정·수치 결과는 표로 정리한다. 표는 4열 이하, 칸마다 2~3줄 이내.\r\n\r\n## 사실과 수치\r\n- 숫자·날짜·금액·인원·기관명은 참고 자료에 있는 것만 쓴다. 없으면 \"○○개소\", \"△△백만원\"처럼 비워둔다. 결재 문서의 수치는 그대로 인용되고 책임이 따른다.\r\n- 결재자·강사·담당자 이름은 알려준 경우에만 넣고, 모르면 빈 문자열이나 \"○○○\"으로 둔다.\r\n- 설문 응답·의견을 지어내지 않는다. 예시가 필요하면 그 항목 바로 아래에 \"* 작성 예시로, 실제 응답으로 교체 필요\" 각주를 단다.\r\n- 합계·비율은 직접 검산한 뒤 쓴다. 비율의 분모(전체 몇 개 중)를 문장에 함께 적는다.\r\n- 날짜에 요일을 붙이면 달력으로 확인한다. 기간은 문서 전체에서 같게 쓴다(표지·요약·본문·일정표).\r\n- 끝나지 않은 일은 \"완료\"라고 쓰지 않는다. \"시범 구축\", \"시험 운영 중\", \"추진 중\"처럼 실제 단계를 쓴다.\r\n- 과장하지 않는다. 하루 몇 회 수집이면 \"실시간\"이 아니다. 유료 도구를 쓰면 \"비용 없음\"이라고 쓰지 않는다.\r\n\r\n## 문서 안에서 일관성\r\n- 같은 대상은 끝까지 같은 이름으로 부른다(예: \"가격정보 없음\"과 \"미보고\"를 섞지 않음).\r\n- 누가 결정하고 누가 실행하는지를 문서 전체에서 같게 쓴다. 표, 각주, 추진 단계가 서로 다르면 안 된다.\r\n- 장 번호·첨부 번호는 생성기가 붙이므로 빠지거나 건너뛸 일이 없다. 본문에서 \"첨부 2 참조\"처럼 가리킬 때만 순서를 맞춘다.\r\n\r\n## 요약 쪽(brief) — 사용자가 요약을 원하거나 본문이 3쪽을 넘으면 넣는다\r\n- 표지 다음 한 쪽(길어도 1.3쪽)에 **이 과업 전체**를 요약한다. 본문 문장을 복사하지 않고 줄여 쓴다.\r\n- 판정 산식·계산 절차 같은 세부 로직은 한 줄로만 적고 자세한 내용은 본문·첨부로 보낸다.\r\n- 구성: 대분류(□) 3~5개, 대분류마다 ○ 항목 2~4개, 필요하면 * 각주.\r\n  대분류 예: 추진 배경 및 목적 / 과업(교육·사업) 개요 / 주요 내용·결과 / 향후 계획\r\n- ○ 항목은 \"(라벨) 문장\" 한 줄이고 핵심 구절을 **굵게** 감싼다.\r\n- compare는 선택이다. 전후 비교나 두 갈래 대상을 한눈에 보여줄 때 두 줄로 쓴다. 예: \"(기존) ~\", \"(개선) ~\" 또는 \"(본부·연구소) ~\", \"(본사) ~\".\r\n\r\n## 첨부 쪽(appendices) — 본문에 넣기엔 긴 표·의견·일정·상세 로직\r\n- 첨부마다 새 쪽에서 \"첨부 N | 제목\" 머리띠로 시작한다. items 형식은 본문과 같다.\r\n- 한 첨부는 한 쪽을 넘기지 않게 줄인다. 넘치면 항목을 추리거나 표를 합친다.\r\n- 의견 첨부: 서술형 응답을 요약하고, 개인·부서가 드러나면 익명으로 처리한 뒤 각주로 밝힌다. 여러 사람의 답을 한 줄로 합치지 않는다.\r\n- 일정 첨부: 회차·일자(요일)·대상·방식·인원 같은 세부 일정표를 표로 넣는다.\r\n- 붙임 목록(attachments)은 \"붙임 ○○ 1부. 끝.\" 한 줄만 만든다. 실제 내용 쪽이 필요하면 appendices를 쓴다.\r\n\r\n## 결과 보고일 때 추가 규칙\r\n- 만족도를 경영평가 점수로 낼 때는 매우 만족 100, 만족 80, 보통 60, 불만족 40, 매우 불만족 20점으로 환산한다.\r\n- 여러 차수·과정을 합칠 때는 응답 건수를 합쳐 한 번에 환산한다(과정별 점수의 단순 평균 금지). 환산 기준을 각주로 적는다.\r\n- 평가 지표로 쓰는 문항과 참고 문항을 표를 나눠 제시한다.\r\n- 대상별로 교육·사업 내용이 다르면 \"구분 | 대상 A | 대상 B\" 비교표로 이원화해 보여준다.\r\n\r\n## JSON 형식\r\n```json\r\n{\r\n  \"team\": \"작성 부서명\",\r\n  \"title\": \"문서 제목 계획(안)\",\r\n  \"subtitle\": \"목적을 담은 부제 ~을 위한\",\r\n  \"summary\": \"무엇을 왜 하고자 함\",\r\n  \"date\": \"2026. 9.\",\r\n  \"approval\": [\r\n    { \"position\": \"담당\", \"name\": \"\" },\r\n    { \"position\": \"부서장 직위\", \"name\": \"\" },\r\n    { \"position\": \"최종 결재자 직위\", \"name\": \"\" }\r\n  ],\r\n  \"brief\": {\r\n    \"compare\": [\"(기존) 바뀌기 전 모습 **핵심**\", \"(개선) 바뀐 뒤 모습 **핵심**\"],\r\n    \"sections\": [\r\n      { \"title\": \"추진 배경 및 목적\", \"items\": [\"(배경) 요약 문장 **결론 구절**\", \"* 각주\", \"(목적) 요약 문장\"] },\r\n      { \"title\": \"향후 계획\", \"items\": [\"(일정) 요약 문장\"] }\r\n    ]\r\n  },\r\n  \"sections\": [\r\n    {\r\n      \"title\": \"추진배경\",\r\n      \"items\": [\r\n        \"(라벨) □ 항목 본문 **결론 구절**\",\r\n        \"ㅇ 하위 항목\",\r\n        \"* 각주\"\r\n      ]\r\n    },\r\n    {\r\n      \"title\": \"추진계획\",\r\n      \"items\": [\r\n        { \"type\": \"box\", \"label\": \"추진체계\", \"text\": \"□ 항목 본문\", \"subs\": [\"하위 항목\"], \"notes\": [\"각주\"] },\r\n        {\r\n          \"type\": \"table\",\r\n          \"columns\": [\"구분\", \"A부서\", \"B부서\"],\r\n          \"rows\": [\r\n            [\"역할\", [\"목록 칸 1\", \"목록 칸 2\"], \"일반 칸\"]\r\n          ]\r\n        }\r\n      ]\r\n    }\r\n  ],\r\n  \"attachments\": [\"붙임 문서명\"],\r\n  \"appendices\": [\r\n    { \"title\": \"첨부 쪽 제목\", \"items\": [\"(라벨) 본문\", { \"type\": \"table\", \"columns\": [\"구분\", \"내용\"], \"rows\": [[\"항목\", \"내용\"]] }] }\r\n  ]\r\n}\r\n```\r\n\r\n- items의 문자열은 \"(라벨) 본문\"이면 □ 항목, \"ㅇ \"로 시작하면 하위 항목, \"* \"로 시작하면 각주다. 요약 쪽(brief)에서는 \"(라벨) 본문\"이 ○ 항목이 된다.\r\n- **굵게**는 □·ㅇ·요약 ○·compare 본문에서만 굵게 바뀐다. 제목·표·각주에서는 별표만 지워진다.\r\n- 표 칸에 배열을 넣으면 줄마다 글머리표가 붙는다. 첫 열은 가운데 굵은 글씨가 된다.\r\n- brief, attachments, appendices는 필요 없으면 뺀다.\r\n- brief의 title·subtitle은 생략하면 문서 제목에 \"(요약)\"을 붙이고 부제를 그대로 쓴다.\r\n- 장 번호(Ⅰ, Ⅱ), 첨부 번호, 「」 괄호는 생성기가 붙이므로 쓰지 않는다.\r\n\r\n## 답하기 전에 스스로 점검\r\n1. 참고 자료에 없는 수치·이름·응답을 만들어 넣지 않았는가\r\n2. 합계·비율·요일을 검산했는가, 기간이 모든 곳에서 같은가\r\n3. 같은 대상을 다른 이름으로 부르거나, 결정 주체가 곳마다 다르지 않은가\r\n4. 요약 쪽이 과업 전체를 담되 세부 로직을 늘어놓지 않았는가\r\n5. \"완료\", \"실시간\", \"비용 없음\" 같은 표현이 사실과 맞는가\r\n";
+</script>
+<script>
+(() => {
+  const G = window.HwpxGongmun;
+  const D = window.GongmunDocTypes;
+  const $ = (id) => document.getElementById(id);
+  const emptyPreview = $('sheet').innerHTML;
+  const b64ToBytes = (b64) => Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+
+  const store = {
+    get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+    set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} },
+  };
+
+  const themeToggle = $('themeToggle');
+  const syncThemeToggle = () => {
+    const dark = document.documentElement.dataset.theme === 'dark';
+    themeToggle.setAttribute('aria-pressed', String(dark));
+    document.querySelector('meta[name="theme-color"]').content = dark ? '#1b1f27' : '#f5f6f8';
+  };
+  syncThemeToggle();
+  themeToggle.addEventListener('click', () => {
+    const theme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+    document.documentElement.dataset.theme = theme;
+    store.set('jkhwpx.theme', theme);
+    syncThemeToggle();
+  });
+
+  let template = null;
+  let templateName = '기본 서식';
+  let currentSpec = null;
+  let fileNameTouched = false;
+  let selectedType = null;
+
+  const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  // **굵게** 표시를 미리보기에서 굵게 보여준다(짝이 안 맞으면 별표만 지움).
+  const rich = (s) => { const parts = String(s == null ? '' : s).split('**'); if (parts.length % 2 === 0) return esc(parts.join('')); return parts.map((t, i) => (i % 2 ? '<b class="em">' + esc(t) + '</b>' : esc(t))).join(''); };
+  const plain = (s) => esc(String(s == null ? '' : s).replace(/\*\*/g, ''));
+  const bracket = (s) => (s ? (/^「[\s\S]*」$/.test(s.trim()) ? s.trim() : '「' + s.trim() + '」') : '');
+
+  function toast(text) {
+    const t = $('toast');
+    t.textContent = text;
+    t.classList.add('show');
+    clearTimeout(toast.timer);
+    toast.timer = setTimeout(() => t.classList.remove('show'), 1800);
+  }
+
+  function msg(box, kind, text) {
+    const d = document.createElement('div');
+    d.className = 'msg ' + kind;
+    d.textContent = text;
+    box.appendChild(d);
+  }
+
+  /* ---------- 문서 유형 ---------- */
+  function renderGroups() {
+    $('groups').innerHTML = D.GROUPS.map((g) =>
+      '<div class="group"><div class="gname" title="' + esc(g.desc) + '">' + esc(g.name) + '</div><div class="chips">' +
+      D.TYPES.filter((t) => t.group === g.id).map((t) =>
+        '<button type="button" class="chip" data-type="' + t.id + '" aria-pressed="' + (t.id === selectedType) + '">' + esc(t.name) + '</button>'
+      ).join('') + '</div></div>'
+    ).join('');
+  }
+
+  function renderDetail() {
+    const box = $('typeDetail');
+    const t = selectedType && D.byId(selectedType);
+    if (!t) { box.hidden = true; $('promptHint').textContent = '유형을 고르지 않으면 AI가 알맞은 구성을 정합니다.'; return; }
+    box.hidden = false;
+    box.innerHTML =
+      '<p class="when">' + esc(t.when) + '</p>' +
+      '<ol class="toc">' + t.sections.map((s, i) =>
+        '<li><span class="rn">' + (G.ROMAN[i] || i + 1) + '</span><span><span class="st">' + esc(s.title) + '</span>' +
+        (s.optional ? '<span class="opt">선택</span>' : '') +
+        '<span class="gd">' + esc(s.guide) + '</span></span></li>'
+      ).join('') + '</ol>' +
+      (t.extras && t.extras.length ? '<p class="extras">필요하면 추가: ' + esc(t.extras.join(', ')) + '</p>' : '') +
+      '<p class="basis">근거: ' + esc(t.basis) + '</p>' +
+      '<div class="row"><button type="button" id="loadSkeleton">빈 틀 불러오기</button><span class="hint">장 구성과 작성 요령이 담긴 틀을 AI 답변 칸에 넣습니다.</span></div>';
+    $('loadSkeleton').addEventListener('click', () => {
+      const current = $('json').value.trim();
+      if (current && !confirm('입력된 JSON을 빈 틀로 바꿀까요?')) return;
+      $('json').value = JSON.stringify(D.skeleton(t.id), null, 2);
+      fileNameTouched = false;
+      refresh();
+      toast(t.name + ' 빈 틀을 불러왔습니다');
+    });
+    $('promptHint').textContent = '"' + t.name + '" 장 구성이 요청문에 들어갑니다.';
+  }
+
+  $('groups').addEventListener('click', (ev) => {
+    const btn = ev.target.closest('.chip');
+    if (!btn) return;
+    selectedType = selectedType === btn.dataset.type ? null : btn.dataset.type;
+    store.set('gongmun.type', selectedType || '');
+    renderGroups();
+    renderDetail();
+  });
+
+  /* ---------- 서식 ---------- */
+  async function useDefaultTemplate() {
+    template = await G.loadTemplate(b64ToBytes(DEFAULT_TEMPLATE_B64));
+    templateName = '기본 서식';
+    $('tplMsg').innerHTML = '';
+    msg($('tplMsg'), 'ok', '지금 쓰는 서식: 기본 서식');
+  }
+
+  /* ---------- JSON ---------- */
+  // AI 답변에서 JSON 덩어리만 뽑는다.
+  function extractJson(raw) {
+    let s = raw.trim();
+    const fence = s.match(/```(?:json)?\s*([\s\S]*?)```/i);
+    if (fence) s = fence[1].trim();
+    const a = s.indexOf('{');
+    const b = s.lastIndexOf('}');
+    if (a > 0 || (b >= 0 && b < s.length - 1)) s = s.slice(a, b + 1);
+    s = s.replace(/[“”]/g, '"').replace(/,\s*([}\]])/g, '$1');
+    return JSON.parse(s);
+  }
+
+  function renderPreview(s) {
+    const out = [];
+    const ap = s.approval && s.approval.length ? s.approval : [{ position: '담당' }, { position: (s.team || '') + '장' }, { position: '' }];
+    out.push('<div class="d-appr">' + ap.slice(0, 3).map((a) => '<div><div class="p">' + esc(a.position || ' ') + '</div><div class="nm">' + esc(a.name || '') + '</div></div>').join('') + '</div>');
+    if (s.brief) {
+      const b = s.brief;
+      out.push('<div class="d-page">요약 쪽</div>');
+      out.push('<div class="d-brief-title">' + (b.subtitle ? '<div class="s">' + plain(bracket(b.subtitle)) + '</div>' : '') + '<div class="t">' + plain(b.title) + '</div></div>');
+      if (b.compare.length) out.push('<div class="d-cmp">' + b.compare.map((c) => '<p>' + (c.label ? '<span class="lb">(' + esc(c.label) + ')</span> ' : '') + rich(c.text) + '</p>').join('') + '</div>');
+      b.sections.forEach((sec) => {
+        out.push('<div class="d-bhead">□ ' + plain(sec.title) + '</div>');
+        sec.items.forEach((it) => {
+          if (it.type === 'note') out.push('<p class="d-note">* ' + plain(it.text) + '</p>');
+          else if (it.type !== 'table') out.push('<p class="d-bitem">○ ' + (it.label ? '<span class="lb">(' + esc(it.label) + ')</span> ' : '') + rich(it.text) + '</p>');
+        });
+      });
+      out.push('<div class="d-page">본문</div>');
+    }
+    out.push('<div class="d-banner"><div class="d-team">' + esc(s.team || '부서') + '</div><div class="d-titles">' +
+      (s.subtitle || s.coverSubtitle ? '<div class="d-sub">' + esc(bracket(s.subtitle || s.coverSubtitle)) + '</div>' : '') +
+      '<div class="d-title">' + esc(s.title || '(제목 없음)') + '</div></div></div>');
+    if (s.summary) out.push('<div class="d-summary"><b>▸</b>' + esc(s.summary) + '</div>');
+    const renderItems = (items) => items.forEach((it) => {
+        if (it.type === 'box') out.push('<p class="d-box">□ ' + (it.label ? '<span class="lb">(' + esc(it.label) + ')</span> ' : '') + rich(it.text) + '</p>');
+        else if (it.type === 'sub') out.push('<p class="d-sub-i">ㅇ ' + rich(it.text) + '</p>');
+        else if (it.type === 'note') out.push('<p class="d-note">* ' + plain(it.text) + '</p>');
+        else if (it.type === 'text') out.push('<p class="d-text">' + esc(it.text) + '</p>');
+        else if (it.type === 'table' && Array.isArray(it.rows)) {
+          const cell = (v) => (Array.isArray(v) ? '<ul>' + v.map((x) => '<li>' + esc(x) + '</li>').join('') + '</ul>' : esc(v).replace(/\n/g, '<br>'));
+          let t = '<table class="d-table">';
+          if (it.columns && it.columns.length) t += '<tr>' + it.columns.map((c) => '<th>' + esc(c) + '</th>').join('') + '</tr>';
+          it.rows.forEach((r) => {
+            t += '<tr>' + (Array.isArray(r) ? r : []).map((v, ci) => '<td class="' + (ci === 0 && it.keyColumn !== false && r.length > 1 ? 'key' : '') + '">' + cell(v) + '</td>').join('') + '</tr>';
+          });
+          out.push(t + '</table>');
+        }
+      });
+    s.sections.forEach((sec, i) => {
+      out.push('<div class="d-sec"><div class="n">' + (G.ROMAN[i] || i + 1) + '</div><div class="t">' + esc(sec.title) + '</div></div>');
+      renderItems(sec.items);
+    });
+    if (s.attachments && s.attachments.length) {
+      const many = s.attachments.length > 1;
+      const lines = s.attachments.map((a, i) => {
+        let line = String(a).trim();
+        if (!/부\.?$/.test(line)) line += '  1부.';
+        if (!line.endsWith('.')) line += '.';
+        return (i === 0 ? '붙임  ' : '      ') + (many ? (i + 1) + '. ' : '') + line + (i === s.attachments.length - 1 ? '  끝.' : '');
+      });
+      out.push('<div class="d-attach">' + esc(lines.join('\n')) + '</div>');
+    }
+    (s.appendices || []).forEach((a, i, all) => {
+      out.push('<div class="d-page">첨부 쪽</div>');
+      out.push('<div class="d-apx"><div class="n">첨부' + (all.length > 1 ? ' ' + (i + 1) : '') + '</div><div class="t">' + plain(a.title) + '</div></div>');
+      renderItems(a.items);
+    });
+    $('sheet').innerHTML = out.join('');
+  }
+
+  function refresh() {
+    const raw = $('json').value;
+    store.set('gongmun.json', raw);
+    const box = $('msgs');
+    box.innerHTML = '';
+    currentSpec = null;
+    $('download').disabled = true;
+    $('stat').textContent = '';
+    $('sheet').innerHTML = emptyPreview;
+    if (!raw.trim()) {
+      return;
+    }
+    let spec;
+    try {
+      spec = extractJson(raw);
+    } catch (e) {
+      msg(box, 'err', 'JSON 문법 오류: ' + e.message + '. AI에게 "JSON만 다시 보내줘"라고 요청해 보세요.');
+      return;
+    }
+    const { errors, warnings, spec: s } = G.validateSpec(spec);
+    renderPreview(s);
+    errors.forEach((e) => msg(box, 'err', e));
+    warnings.forEach((w) => msg(box, 'warn', w));
+    const itemCount = s.sections.reduce((a, sec) => a + sec.items.length, 0);
+    const typeName = spec.docType && D.byId(spec.docType) ? D.byId(spec.docType).name + ' · ' : '';
+    $('stat').textContent = typeName + (s.brief ? '요약 쪽 · ' : '') + s.sections.length + '개 장 · ' + itemCount + '개 항목' + (s.appendices && s.appendices.length ? ' · 첨부 ' + s.appendices.length + '쪽' : '');
+    if (!errors.length) {
+      msg(box, 'ok', '생성할 수 있습니다. (' + templateName + ')');
+      currentSpec = spec;
+      $('download').disabled = false;
+      if (!fileNameTouched) $('fileName').value = G.suggestFileName(s);
+    }
+  }
+
+  $('json').addEventListener('input', () => { clearTimeout(refresh.t); refresh.t = setTimeout(refresh, 250); });
+  $('fileName').addEventListener('input', () => { fileNameTouched = true; });
+
+  $('loadExample').addEventListener('click', () => {
+    if ($('json').value.trim() && !confirm('작성 중인 내용을 예시로 바꿀까요?')) return;
+    $('json').value = JSON.stringify(EXAMPLE, null, 2);
+    fileNameTouched = false;
+    refresh();
+  });
+
+  $('formatJson').addEventListener('click', () => {
+    try { $('json').value = JSON.stringify(extractJson($('json').value), null, 2); refresh(); }
+    catch (e) { toast('JSON을 해석할 수 없어 정리하지 못했습니다'); }
+  });
+
+  $('copyPrompt').addEventListener('click', async () => {
+    const material = $('material').value.trim();
+    store.set('gongmun.material', $('material').value);
+    const typeBlock = selectedType ? '\n\n' + D.promptFor(selectedType) + '\n- JSON 최상위에 "docType": "' + selectedType + '" 를 넣는다.' : '';
+    const text = PROMPT_GUIDE + typeBlock + '\n\n## 작성할 문서와 참고 자료\n' + (material || '(여기에 쓰고 싶은 문서와 자료를 적어주세요)');
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch (e) {
+      const ta = document.createElement('textarea');
+      ta.value = text; document.body.appendChild(ta); ta.select();
+      document.execCommand('copy'); ta.remove();
+    }
+    toast('요청문을 복사했습니다. AI 대화창에 붙여넣으세요');
+  });
+
+  function saveBytes(bytes, name) {
+    const blob = new Blob([bytes], { type: 'application/hwp+zip' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
+  }
+
+  $('download').addEventListener('click', async () => {
+    if (!currentSpec) return;
+    const btn = $('download');
+    btn.disabled = true;
+    try {
+      const bytes = await G.buildHwpx(currentSpec, template);
+      let name = $('fileName').value.trim() || G.suggestFileName(currentSpec);
+      if (!/\.hwpx$/i.test(name)) name += '.hwpx';
+      saveBytes(bytes, name);
+      toast('내려받았습니다');
+    } catch (e) {
+      msg($('msgs'), 'err', e.message);
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  $('tplFile').addEventListener('change', async (ev) => {
+    const f = ev.target.files[0];
+    if (!f) return;
+    $('tplMsg').innerHTML = '';
+    try {
+      template = await G.loadTemplate(new Uint8Array(await f.arrayBuffer()));
+      templateName = f.name;
+      msg($('tplMsg'), 'ok', '지금 쓰는 서식: ' + f.name + ' (원형 ' + Object.keys(template.tpl.proto).length + '종)');
+      refresh();
+    } catch (e) {
+      msg($('tplMsg'), 'err', e.message);
+      await useDefaultTemplate();
+    }
+    ev.target.value = '';
+  });
+  $('tplReset').addEventListener('click', async () => { await useDefaultTemplate(); refresh(); });
+  $('tplDownload').addEventListener('click', () => saveBytes(b64ToBytes(DEFAULT_TEMPLATE_B64), '공문_기본서식.hwpx'));
+
+  (async () => {
+    const savedType = store.get('gongmun.type');
+    if (savedType && D.byId(savedType)) selectedType = savedType;
+    renderGroups();
+    renderDetail();
+    await useDefaultTemplate();
+    const saved = store.get('gongmun.json');
+    const savedMaterial = store.get('gongmun.material');
+    if (savedMaterial) $('material').value = savedMaterial;
+    if (saved) { $('json').value = saved; refresh(); }
+  })().catch((e) => msg($('msgs'), 'err', '초기화 실패: ' + e.message));
+})();
+</script>
+</body>
+</html>
